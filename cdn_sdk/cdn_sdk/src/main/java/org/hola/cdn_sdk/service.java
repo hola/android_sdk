@@ -145,8 +145,10 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                             m_url+"\"");
                         continue;
                     }
-                    String bitrate = lines[i].substring(bw_pos+10,
-                        lines[i].indexOf(",", bw_pos+10));
+                    int bw_end = lines[i].indexOf(",", bw_pos+10);
+                    String bitrate = bw_end<0 ?
+                        lines[i].substring(bw_pos+10) :
+                        lines[i].substring(bw_pos+10, bw_end);
                     curr_level.m_bitrate = Integer.valueOf(bitrate);
                 }
                 else if (lines[i].startsWith("#EXTINF"))
@@ -466,7 +468,7 @@ public void init(String customer, Bundle extra, Handler callback)
     m_wv.setWebChromeClient(new console_adapter());
     ws.setJavaScriptEnabled(true);
     ws.setSupportZoom(false);
-    ws.setUserAgentString(ws.getUserAgentString()+" CDNService/1.13.857");
+    ws.setUserAgentString(ws.getUserAgentString()+" CDNService/1.14.49");
     m_wv.setVerticalScrollBarEnabled(false);
     final FrameLayout frame = new FrameLayout(this);
     frame.addView(m_wv);

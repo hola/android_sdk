@@ -30,7 +30,7 @@ private boolean m_prepared = false;
 private boolean m_starting = false;
 private int m_orientation = 0;
 private api m_hola_cdn;
-private MediaPlayer m_player = new MediaPlayer();;
+private MediaPlayer m_player;
 private SurfaceHolder m_holder;
 private SurfaceView m_surface;
 private ProgressDialog m_pd;
@@ -40,8 +40,11 @@ private Handler m_callback = new Handler(){
         switch (msg.what)
         {
         case api.MSG_WEBSOCKET_CONNECTED:
+            m_player = MediaPlayer.create(MainActivity.this, Uri.parse(video),
+                m_holder);
+            m_player.stop();
+            m_player.reset();
             m_player = m_hola_cdn.attach(m_player);
-            Log.i(TAG, "CDN attached");
             m_player.setOnVideoSizeChangedListener(
                 new MediaPlayer.OnVideoSizeChangedListener(){
                 @Override
@@ -51,7 +54,7 @@ private Handler m_callback = new Handler(){
                     surface_update(w, h);
                 }
             });
-            m_player.setDisplay(m_holder);
+            Log.i(TAG, "CDN attached");
             break;
         case api.MSG_TIMEUPDATE:
             m_seekbar.setProgress(msg.arg1);
