@@ -170,6 +170,7 @@ protected void onCreate(Bundle savedInstanceState){
     .setOnClickListener(new Button.OnClickListener(){
         @Override
         public void onClick(View view){
+            m_hola_cdn.get_stats();
             m_player.stop();
             findViewById(R.id.button).setEnabled(false);
             findViewById(R.id.button2).setEnabled(false);

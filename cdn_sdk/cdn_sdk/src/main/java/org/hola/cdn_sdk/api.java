@@ -61,4 +61,5 @@ public boolean is_attached(){
     return m_service!=null && m_service.is_attached(); }
 public void send_message(String msg, String data){
     m_service.send_message(msg, data); }
+public void get_stats(){ m_service.get_stats(); }
 }

@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
+import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -290,6 +291,16 @@ String get_levels(){
         send_perr("lvlinf_json_error", "\"msg\":\""+e.getMessage()+"\""); }
     return jo.toString();
 }
+void get_stats(){
+    if (m_wv==null)
+        return;
+    m_wv.evaluateJavascript("javascript:hola_cdn.get_stats()",
+        new ValueCallback<String>(){
+            @Override
+            public void onReceiveValue(String s){
+                Log.d(api.TAG, s); }
+        });
+}
 private void send_perr(String msg, String data){
     String perr = "\"id\":\""+msg+"\"";
     if (data!=null)
@@ -443,9 +454,9 @@ public void onRebind(Intent intent){
     super.onRebind(intent);
     Log.d(api.TAG, "CDN Service is rebinded");
 }
-public class hola_service_binder extends Binder {
+class hola_service_binder extends Binder {
     public service get_service(){ return service.this; } }
-public void init(String customer, Bundle extra, Handler callback)
+void init(String customer, Bundle extra, Handler callback)
 {
     WindowManager windowManager =
         (WindowManager) getSystemService(WINDOW_SERVICE);
@@ -468,7 +479,7 @@ public void init(String customer, Bundle extra, Handler callback)
     m_wv.setWebChromeClient(new console_adapter());
     ws.setJavaScriptEnabled(true);
     ws.setSupportZoom(false);
-    ws.setUserAgentString(ws.getUserAgentString()+" CDNService/1.14.49");
+    ws.setUserAgentString(ws.getUserAgentString()+" CDNService/1.14.102");
     m_wv.setVerticalScrollBarEnabled(false);
     final FrameLayout frame = new FrameLayout(this);
     frame.addView(m_wv);
@@ -483,7 +494,7 @@ public void init(String customer, Bundle extra, Handler callback)
     m_wv.addJavascriptInterface(m_js_proxy, "hola_java_proxy");
     m_wv.loadUrl(url);
 }
-public MediaPlayer attach(MediaPlayer source){
+MediaPlayer attach(MediaPlayer source){
     if (m_wv == null)
         return null;
     m_plr_proxy = new mplayer_proxy();
@@ -492,7 +503,7 @@ public MediaPlayer attach(MediaPlayer source){
     send_message("attach", null);
     return m_plr_proxy;
 }
-public void send_message(String cmd, String data){
+void send_message(String cmd, String data){
     String msg = "{\"cmd\":\""+cmd+"\"";
     if (data!=null)
         msg += ","+data;
@@ -502,6 +513,6 @@ public void send_message(String cmd, String data){
     else
         m_msg_queue.add(msg);
 }
-public boolean is_ws(){ return m_socket!=null; }
-public boolean is_attached(){ return m_attached; }
+boolean is_ws(){ return m_socket!=null; }
+boolean is_attached(){ return m_attached; }
 }

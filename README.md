@@ -54,3 +54,8 @@ for MediaPlayer object and HLS source is functional. Example:
       m_player = m_hola_cdn.attach(m_player);
 
 Afterwards, m_player instance can be used as a regular MediaPlayer object.
+
+## Reporting
+
+  void org.hola.cdn_sdk.api.get_stats() - outputs current Hola CDN stats to
+  logcat
