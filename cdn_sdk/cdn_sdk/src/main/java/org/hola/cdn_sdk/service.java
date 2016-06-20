@@ -437,6 +437,8 @@ public void onCreate(){
 @Override
 public void onDestroy(){
     super.onDestroy();
+    m_serverws.stop();
+    m_dataproxy.stop();
     Log.i(api.TAG, "CDN Service is stopped");
 }
 @Override
@@ -479,7 +481,8 @@ void init(String customer, Bundle extra, Handler callback)
     m_wv.setWebChromeClient(new console_adapter());
     ws.setJavaScriptEnabled(true);
     ws.setSupportZoom(false);
-    ws.setUserAgentString(ws.getUserAgentString()+" CDNService/1.14.102");
+    ws.setUserAgentString(ws.getUserAgentString()+" CDNService/"
+        +BuildConfig.VERSION_NAME);
     m_wv.setVerticalScrollBarEnabled(false);
     final FrameLayout frame = new FrameLayout(this);
     frame.addView(m_wv);

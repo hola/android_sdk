@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Hola CDN demo</string>
+    <string name="app_name">HolaCDN demo</string>
     <string name="customer">demo</string>
     <string name="hola_mode">cdn</string>
     <string name="hola_zone">portal</string>

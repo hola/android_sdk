@@ -20,9 +20,7 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 import org.hola.cdn_sdk.api;
 import java.io.IOException;
-public class MainActivity extends AppCompatActivity
-    implements SurfaceHolder.Callback
-{
+public class MainActivity extends AppCompatActivity {
 public final static String TAG = "HolaCDN_demo";
 private String video = "http://player.h-cdn.org/static/hls/cdn2/master.m3u8";
 private boolean m_finished = false;
@@ -40,6 +38,7 @@ private Handler m_callback = new Handler(){
         switch (msg.what)
         {
         case api.MSG_WEBSOCKET_CONNECTED:
+            Log.d(TAG, "Web socket connected");
             m_player = MediaPlayer.create(MainActivity.this, Uri.parse(video),
                 m_holder);
             m_player.stop();
@@ -95,18 +94,16 @@ protected void onCreate(Bundle savedInstanceState){
     m_seekbar = (SeekBar) findViewById(R.id.seekbar);
     m_surface = (SurfaceView) findViewById(R.id.surfview);
     m_holder = m_surface.getHolder();
-    m_holder.addCallback(MainActivity.this);
     surface_update(640, 360);
-    Log.i(TAG, "Player created");
     ((Button) findViewById(R.id.button))
     .setOnClickListener(new Button.OnClickListener(){
         @Override
         public void onClick(View view){
-            if (m_starting|| m_finished)
+            if (m_starting)
                 return;
-            m_starting = true;
             if (!m_prepared)
             {
+                m_starting = true;
                 try {
                     video = ((EditText) findViewById(R.id.editText)).getText()
                     .toString();
@@ -123,12 +120,14 @@ protected void onCreate(Bundle savedInstanceState){
                                     AudioManager.STREAM_MUSIC);
                                 Log.i(TAG, "Video prepared");
                                 m_prepared = true;
+                                m_starting = false;
                                 m_player.start();
                                 Toast.makeText(MainActivity.this,
                                     "Playback started", Toast.LENGTH_SHORT)
                                 .show();
                             }
                         });
+                    view.setEnabled(false);
                     m_player.prepareAsync();
                 } catch(IOException i){
                     i.printStackTrace();
@@ -142,6 +141,8 @@ protected void onCreate(Bundle savedInstanceState){
             {
                 Toast.makeText(MainActivity.this, "Playback resumed",
                     Toast.LENGTH_SHORT).show();
+                view.setEnabled(false);
+                findViewById(R.id.button2).setEnabled(true);
                 m_player.start();
             }
         }
@@ -156,13 +157,9 @@ protected void onCreate(Bundle savedInstanceState){
             {
                 Toast.makeText(MainActivity.this, "Playback paused",
                     Toast.LENGTH_SHORT).show();
+                view.setEnabled(false);
+                findViewById(R.id.button).setEnabled(true);
                 m_player.pause();
-            }
-            else
-            {
-                Toast.makeText(MainActivity.this, "Playback resumed",
-                    Toast.LENGTH_SHORT).show();
-                m_player.start();
             }
         }
     });
@@ -223,12 +220,6 @@ protected void onCreate(Bundle savedInstanceState){
 protected void onDestroy(){
     super.onDestroy();
     m_player.release();
+    m_hola_cdn.uninit();
 }
-@Override
-public void surfaceCreated(SurfaceHolder surfaceHolder){}
-@Override
-public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2){
-}
-@Override
-public void surfaceDestroyed(SurfaceHolder surfaceHolder){}
 }

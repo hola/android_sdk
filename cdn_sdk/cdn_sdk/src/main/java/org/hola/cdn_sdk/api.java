@@ -25,24 +25,23 @@ public boolean init(Context ctx, String customer, Bundle extra,
 {
     if (Build.VERSION.SDK_INT<Build.VERSION_CODES.KITKAT)
         return false;
-    Log.d(TAG, "Hola CDN API init");
+    Log.d(TAG, "HolaCDN API init");
     m_ctx = ctx;
     m_extra = extra;
     m_customer = customer;
-    m_conn = new ServiceConnection()
-    {
+    m_conn = new ServiceConnection(){
         @Override
         public void onServiceConnected(ComponentName componentName,
             IBinder iBinder)
         {
-            Log.d(TAG, "Hola CDN API connected to service");
+            Log.d(TAG, "HolaCDN API connected to service");
             m_service = ((service.hola_service_binder) iBinder).get_service();
             m_service.init(m_customer, m_extra, callback);
             callback.sendEmptyMessage(MSG_SERVICE_CONNECTED);
         }
         @Override
         public void onServiceDisconnected(ComponentName componentName){
-            Log.d(TAG, "Hola CDN API disconnected from service");
+            Log.d(TAG, "HolaCDN API disconnected from service");
             m_service = null;
         }
     };
@@ -50,6 +49,8 @@ public boolean init(Context ctx, String customer, Bundle extra,
         Context.BIND_AUTO_CREATE);
     return true;
 }
+public void uninit(){
+    m_ctx.unbindService(m_conn); }
 public MediaPlayer attach(MediaPlayer player){
     if (m_service==null)
         return null;
