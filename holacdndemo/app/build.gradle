@@ -1,0 +1,45 @@
+apply plugin: 'com.android.application'
+
+allprojects {
+    repositories {
+        jcenter()
+        flatDir {
+            dirs 'libs'
+        }
+    }
+}
+
+android {
+    signingConfigs {
+        config {
+            storeFile file('release.jks')
+            storePassword '123456'
+            keyPassword '123456'
+            keyAlias 'release'
+        }
+    }
+    compileSdkVersion 23
+    buildToolsVersion "24.0.0 rc3"
+    defaultConfig {
+        applicationId "org.hola.holacdndemo"
+        minSdkVersion 19
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0"
+        signingConfig signingConfigs.config
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+        }
+    }
+    productFlavors {
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile(name: 'cdn_sdk', ext: 'aar')
+}
