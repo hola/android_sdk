@@ -1,10 +1,12 @@
 # android_sdk
 
-This document describes integration of a native Android app to Hola CDN
+This document describes integration of a native Android app to HolaCDN.
+
+Android version 4.4 and above is required.
 
 ## Initialization
 
-- On app start init Hola CDN by creating a new instance of
+- On app start init HolaCDN by creating a new instance of
   org.hola.cdn_sdk.api and calling init method.
 
   Signature:
@@ -44,12 +46,12 @@ This document describes integration of a native Android app to Hola CDN
 
 ## Attaching
 
-Attachment is required to activate Hola CDN features. At the moment, cdn mode
+Attachment is required to activate HolaCDN features. At the moment, cdn mode
 for MediaPlayer object and HLS source is functional. Example:
 
   MediaPlayer m_player = new MediaPlayer();
   if (!m_hola_cdn.is_connected())
-      Log.d("Demo", "Hola CDN isn't connected, skip attaching");
+      Log.d("Demo", "HolaCDN isn't connected, skip attaching");
   else
       m_player = m_hola_cdn.attach(m_player);
 
@@ -57,5 +59,5 @@ Afterwards, m_player instance can be used as a regular MediaPlayer object.
 
 ## Reporting
 
-  void org.hola.cdn_sdk.api.get_stats() - outputs current Hola CDN stats to
+  void org.hola.cdn_sdk.api.get_stats() - outputs current HolaCDN stats to
   logcat
