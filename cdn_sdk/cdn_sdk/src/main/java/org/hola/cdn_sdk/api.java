@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.VideoView;
 @SuppressWarnings("unused")
 public class api {
 final static String TAG = "HolaCDN";
@@ -55,6 +56,11 @@ public MediaPlayer attach(MediaPlayer player){
     if (m_service==null)
         return null;
     return m_service.attach(player);
+}
+public VideoView attach(VideoView vview){
+    if (m_service==null)
+        return null;
+    return m_service.attach(vview);
 }
 public boolean is_inited(){ return m_service!=null; }
 public boolean is_connected(){ return m_service!=null && m_service.is_ws(); }

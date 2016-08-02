@@ -10,8 +10,7 @@ import android.view.SurfaceHolder;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.util.Map;
-public class mplayer_proxy extends MediaPlayer
-{
+public class mplayer_proxy extends MediaPlayer implements proxy_api {
 private MediaPlayer m_player;
 private Handler m_handler;
 private String m_state = "NONE";
@@ -42,8 +41,8 @@ private class thread_t implements Runnable {
         }
     }
 }
-void init(MediaPlayer source, Handler hnd){
-    m_player = source;
+public void init(Object source, Handler hnd){
+    m_player = (MediaPlayer) source;
     m_handler = hnd;
     update_state(m_player.isPlaying() ? "PLAYING" : "IDLE");
     m_player.setOnPreparedListener(new OnPreparedListener(){
@@ -74,9 +73,9 @@ void init(MediaPlayer source, Handler hnd){
         }
     });
 }
-String get_state(){ return m_state; }
-String get_url(){ return m_videourl; }
-boolean is_prepared(){ return m_prepared; }
+public String get_state(){ return m_state; }
+public String get_url(){ return m_videourl; }
+public boolean is_prepared(){ return m_prepared; }
 private void update_state(String new_state){ update_state(new_state, -1); }
 private void update_state(String new_state, int param){
     Message msg = new Message();
@@ -93,10 +92,10 @@ private void update_state(String new_state, int param){
     if (new_state.equals("IDLE"))
         m_timeupdate.stop();
 }
-int get_bitrate(){ return m_bitrate; }
-void set_bitrate(int br){ m_bitrate = br; }
-int get_bandwidth(){ return m_bandwidth; }
-void set_bandwidth(int br){ m_bandwidth = br; }
+public int get_bitrate(){ return m_bitrate; }
+public void set_bitrate(int br){ m_bitrate = br; }
+public int get_bandwidth(){ return m_bandwidth; }
+public void set_bandwidth(int br){ m_bandwidth = br; }
 @Override
 public void setDisplay(SurfaceHolder sh){ m_player.setDisplay(sh); }
 @Override
@@ -187,7 +186,7 @@ public void seekTo(int i) throws IllegalStateException
 }
 @Override
 public int getCurrentPosition(){
-    return m_player ==null ? 0 : m_player.getCurrentPosition(); }
+    return m_player==null ? 0 : m_player.getCurrentPosition(); }
 @Override
 public int getDuration(){ return m_player.getDuration(); }
 @Override

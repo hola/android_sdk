@@ -2,41 +2,40 @@ package org.hola.cdn_sdk;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 @SuppressWarnings("unused")
 public class js_proxy {
 private final service m_service;
 private final Handler m_handler;
-private mplayer_proxy m_player;
+private proxy_api m_proxy;
 private int m_reqid = 1;
 public js_proxy(Handler handler, service service){
     m_handler = handler;
     m_service = service;
 }
-public void set_player(mplayer_proxy player){ m_player = player; }
+public void set_proxy(proxy_api proxy){ m_proxy = proxy; }
 @JavascriptInterface
-public int get_duration(){ return m_player.getDuration(); }
+public int get_duration(){ return m_proxy.getDuration(); }
 @JavascriptInterface
-public int get_pos(){ return m_player.getCurrentPosition(); }
+public int get_pos(){ return m_proxy.getCurrentPosition(); }
 @JavascriptInterface
-public String get_url(){ return m_player.get_url(); }
+public String get_url(){ return m_proxy.get_url(); }
 @JavascriptInterface
-public int get_bitrate(){ return m_player.get_bitrate(); }
+public int get_bitrate(){ return m_proxy.get_bitrate(); }
 @JavascriptInterface
-public int get_bandwidth(){ return m_player.get_bandwidth(); }
+public int get_bandwidth(){ return m_proxy.get_bandwidth(); }
 @JavascriptInterface
 public String get_levels(){ return m_service.get_levels(); }
 @JavascriptInterface
 public String get_segment_info(String url){
     return m_service.get_segment_info(url); }
 @JavascriptInterface
-public String get_state(){ return m_player.get_state(); }
-// XXX pavelki: stub
+public String get_state(){ return m_proxy.get_state(); }
+// XXX pavelki: broken for HLS. Need to test for progressive
 @JavascriptInterface
 public int get_buffered(){ return 0; }
 @JavascriptInterface
-public boolean is_prepared(){ return m_player.is_prepared(); }
+public boolean is_prepared(){ return m_proxy.is_prepared(); }
 @JavascriptInterface
 public int fetch(String url, int frag_id){
     Bundle bundle = new Bundle();

@@ -2,6 +2,7 @@ package org.hola.cdn_sdk;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
@@ -12,6 +13,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
 import android.webkit.ValueCallback;
@@ -19,6 +21,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.VideoView;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpRequest;
 import com.koushikdutta.async.http.AsyncHttpResponse;
@@ -32,8 +35,10 @@ import com.koushikdutta.async.http.server.HttpServerRequestCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 import java.util.Vector;
 public class service extends Service {
@@ -46,7 +51,7 @@ static final int MSG_TIMEUPDATE = 6;
 private boolean m_attached;
 private WebView m_wv;
 private WebSocket m_socket;
-private mplayer_proxy m_plr_proxy;
+private proxy_api m_proxy;
 private js_proxy m_js_proxy;
 private Handler m_handler;
 private Handler m_callback;
@@ -108,8 +113,8 @@ private class http_request_t extends AsyncHttpClient.StringCallback
         if ((resp = get_clean())==null)
             return;
         long req_dur = System.currentTimeMillis()-m_starttime;
-        m_plr_proxy.set_bitrate(get_url_level(resp.m_path).m_bitrate);
-        m_plr_proxy.set_bandwidth((int)(m_bytes*8000/req_dur));
+        m_proxy.set_bitrate(get_url_level(resp.m_path).m_bitrate);
+        m_proxy.set_bandwidth((int)(m_bytes*8000/req_dur));
         resp.m_response.proxy(response);
     }
     @Override
@@ -420,7 +425,7 @@ public void onCreate(){
                 break;
             case MSG_ATTACHED: m_attached = true; break;
             case MSG_TIMEUPDATE:
-                int pos = m_plr_proxy.getCurrentPosition();
+                int pos = m_proxy.getCurrentPosition();
                 send_message("time", "\"pos\":"+pos);
                 if (m_callback!=null)
                 {
@@ -500,11 +505,46 @@ void init(String customer, Bundle extra, Handler callback)
 MediaPlayer attach(MediaPlayer source){
     if (m_wv == null)
         return null;
-    m_plr_proxy = new mplayer_proxy();
-    m_plr_proxy.init(source, m_handler);
-    m_js_proxy.set_player(m_plr_proxy);
+    m_proxy = new mplayer_proxy();
+    m_proxy.init(source, m_handler);
+    m_js_proxy.set_proxy(m_proxy);
     send_message("attach", null);
-    return m_plr_proxy;
+    return (MediaPlayer) m_proxy;
+}
+VideoView attach(VideoView source){
+    Log.d(api.TAG, "VideoView attach");
+    if (m_wv == null)
+        return null;
+    m_proxy = new videoview_proxy(this);
+    m_proxy.init(source, m_handler);
+    m_js_proxy.set_proxy(m_proxy);
+    send_message("attach", null);
+    return (VideoView) m_proxy;
+}
+static final Field find_field(Object obj, Class<?> type){
+    Class<?> obj_class = obj.getClass();
+    Field field = null;
+    do {
+        for (Field f: obj_class.getDeclaredFields())
+        {
+            if (f.getType().isAssignableFrom(type))
+            {
+                field = f;
+                break;
+            }
+        }
+    } while (field==null && (obj_class = obj_class.getSuperclass()) != null);
+    return field;
+}
+static final Object get_field(Object obj, Class<?> type){
+    Field field = find_field(obj, type);
+    if (field==null)
+        return null;
+    try {
+        field.setAccessible(true);
+        return field.get(obj);
+    } catch(IllegalAccessException e){ e.printStackTrace(); }
+    return null;
 }
 void send_message(String cmd, String data){
     String msg = "{\"cmd\":\""+cmd+"\"";
