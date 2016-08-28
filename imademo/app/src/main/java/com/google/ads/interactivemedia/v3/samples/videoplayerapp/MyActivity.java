@@ -87,7 +87,6 @@ public class MyActivity extends ActionBarActivity {
      * The main fragment for displaying video content.
      */
     public static class VideoFragment extends Fragment {
-        private api m_hola_cdn;
         private VideoView m_videoview;
         protected VideoPlayerController mVideoPlayerController;
         private Handler m_callback = new Handler(){
@@ -97,7 +96,7 @@ public class MyActivity extends ActionBarActivity {
                 {
                 case api.MSG_WEBSOCKET_CONNECTED:
                     Log.d(TAG, "Web socket connected");
-                    m_videoview = m_hola_cdn.attach(m_videoview);
+                    m_videoview = api.attach(m_videoview);
                     mVideoPlayer = (VideoPlayer) new SampleVideoPlayer(
                         m_videoview, VideoFragment.this.getActivity());
                     mVideoPlayerController = new VideoPlayerController(
@@ -108,7 +107,7 @@ public class MyActivity extends ActionBarActivity {
                             @Override
                             public void onContentComplete(){
                                 Log.d(TAG, "Content completed");
-                                m_hola_cdn.get_stats();
+                                api.get_stats();
                             }
                         }
                     );
@@ -127,20 +126,20 @@ public class MyActivity extends ActionBarActivity {
             }
         };
 
-
-
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_video, container, false);
-            m_videoview = (VideoView) rootView.findViewById(R.id.sampleVideoPlayer);
+            View rootView = inflater.inflate(R.layout.fragment_video,
+                    container, false);
+            m_videoview = (VideoView) rootView
+                .findViewById(R.id.sampleVideoPlayer);
             Bundle extra = new Bundle();
             extra.putString("hola_zone", getString(R.string.hola_zone));
             extra.putString("hola_mode", getString(R.string.hola_mode));
-            m_hola_cdn = new api();
-            m_hola_cdn.init(m_videoview.getContext(),
-                getString(R.string.customer), extra, m_callback);
-            mAdUIContainer = (ViewGroup) rootView.findViewById(R.id.videoPlayerWithAdPlayback);
+            api.init(m_videoview.getContext(), getString(R.string.customer),
+                    extra, m_callback);
+            mAdUIContainer = (ViewGroup) rootView
+                .findViewById(R.id.videoPlayerWithAdPlayback);
             mPlayButton = rootView.findViewById(R.id.playButton);
 
             return rootView;

@@ -27,7 +27,6 @@ private boolean m_finished = false;
 private boolean m_prepared = false;
 private boolean m_starting = false;
 private int m_orientation = 0;
-private api m_hola_cdn;
 private MediaPlayer m_player;
 private SurfaceHolder m_holder;
 private SurfaceView m_surface;
@@ -43,7 +42,7 @@ private Handler m_callback = new Handler(){
                 m_holder);
             m_player.stop();
             m_player.reset();
-            m_player = m_hola_cdn.attach(m_player);
+            m_player = api.attach(m_player);
             m_player.setOnVideoSizeChangedListener(
                 new MediaPlayer.OnVideoSizeChangedListener(){
                 @Override
@@ -89,8 +88,7 @@ protected void onCreate(Bundle savedInstanceState){
     Bundle extra = new Bundle();
     extra.putString("hola_zone", getString(R.string.hola_zone));
     extra.putString("hola_mode", getString(R.string.hola_mode));
-    m_hola_cdn = new api();
-    m_hola_cdn.init(this, getString(R.string.customer), extra, m_callback);
+    api.init(this, getString(R.string.customer), extra, m_callback);
     m_seekbar = (SeekBar) findViewById(R.id.seekbar);
     m_surface = (SurfaceView) findViewById(R.id.surfview);
     m_holder = m_surface.getHolder();
@@ -167,7 +165,7 @@ protected void onCreate(Bundle savedInstanceState){
     .setOnClickListener(new Button.OnClickListener(){
         @Override
         public void onClick(View view){
-            m_hola_cdn.get_stats();
+            api.get_stats();
             m_player.stop();
             findViewById(R.id.button).setEnabled(false);
             findViewById(R.id.button2).setEnabled(false);
@@ -203,9 +201,9 @@ protected void onCreate(Bundle savedInstanceState){
     new Thread(){
         @Override
         public void run(){
-            while (true)
+            for (;;)
             {
-                if (m_hola_cdn.is_attached())
+                if (api.is_attached())
                 {
                     m_pd.dismiss();
                     break;
@@ -220,6 +218,6 @@ protected void onCreate(Bundle savedInstanceState){
 protected void onDestroy(){
     super.onDestroy();
     m_player.release();
-    m_hola_cdn.uninit();
+    api.uninit();
 }
 }
