@@ -11,4 +11,5 @@ public boolean is_prepared();
 public void set_bitrate(int br);
 public void set_bandwidth(int br);
 public void init(Object source, Handler handler);
+public String get_player_name();
 }

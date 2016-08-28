@@ -2,8 +2,7 @@
   package="org.hola.cdn_sdk">
   <uses-permission android:name="android.permission.INTERNET">
   </uses-permission>
-  <application android:allowBackup="true" android:label="@string/app_name"
-    android:supportsRtl="true">
+  <application>
     <service android:name="org.hola.cdn_sdk.service" android:enabled="true">
     </service>
   </application>

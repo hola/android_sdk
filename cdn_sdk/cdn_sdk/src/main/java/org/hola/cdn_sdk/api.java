@@ -10,18 +10,23 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.VideoView;
+import com.google.android.exoplayer.ExoPlaybackException;
+import com.google.android.exoplayer.ExoPlayer;
+import com.google.android.exoplayer.upstream.DefaultHttpDataSource;
+import com.google.android.exoplayer.upstream.HttpDataSource;
+import com.google.android.exoplayer.upstream.TransferListener;
 @SuppressWarnings("unused")
 public class api {
 final static String TAG = "HolaCDN";
 public final static int MSG_SERVICE_CONNECTED = 1;
 public final static int MSG_WEBSOCKET_CONNECTED = 2;
 public final static int MSG_TIMEUPDATE = 3;
-private ServiceConnection m_conn = null;
-private service m_service;
-private Context m_ctx;
-private Bundle m_extra;
-private String m_customer;
-public boolean init(Context ctx, String customer, Bundle extra,
+private static ServiceConnection m_conn = null;
+private static service m_service;
+private static Context m_ctx;
+private static Bundle m_extra;
+private static String m_customer;
+public static boolean init(Context ctx, String customer, Bundle extra,
     final Handler callback)
 {
     if (Build.VERSION.SDK_INT<Build.VERSION_CODES.KITKAT)
@@ -50,23 +55,39 @@ public boolean init(Context ctx, String customer, Bundle extra,
         Context.BIND_AUTO_CREATE);
     return true;
 }
-public void uninit(){
+public static void uninit(){
+    detach();
     m_ctx.unbindService(m_conn); }
-public MediaPlayer attach(MediaPlayer player){
+public static MediaPlayer attach(MediaPlayer player){
     if (m_service==null)
         return null;
     return m_service.attach(player);
 }
-public VideoView attach(VideoView vview){
+public static VideoView attach(VideoView vview){
     if (m_service==null)
         return null;
     return m_service.attach(vview);
 }
-public boolean is_inited(){ return m_service!=null; }
-public boolean is_connected(){ return m_service!=null && m_service.is_ws(); }
-public boolean is_attached(){
+public static HttpDataSource attach(ExoPlayer player, String user_agent,
+    TransferListener b_meter, String url)
+{
+    if (m_service==null)
+        return null;
+    m_service.attach(player, url);
+    return new exoplayer_data_source(new DefaultHttpDataSource(user_agent,
+        null,b_meter, DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+        DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS, false));
+}
+public static void detach(){
+    if (m_service!=null)
+        m_service.detach();
+}
+public static boolean is_inited(){ return m_service!=null; }
+public static boolean is_connected(){
+    return m_service!=null && m_service.is_ws(); }
+public static boolean is_attached(){
     return m_service!=null && m_service.is_attached(); }
-public void send_message(String msg, String data){
+public static void send_message(String msg, String data){
     m_service.send_message(msg, data); }
-public void get_stats(){ m_service.get_stats(); }
+public static void get_stats(){ m_service.get_stats(); }
 }

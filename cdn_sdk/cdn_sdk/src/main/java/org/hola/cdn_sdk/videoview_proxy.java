@@ -143,6 +143,7 @@ public int get_bitrate(){ return m_bitrate; }
 public void set_bitrate(int br){ m_bitrate = br; }
 public int get_bandwidth(){ return m_bandwidth; }
 public void set_bandwidth(int br){ m_bandwidth = br; }
+public String get_player_name(){ return "VideoView"; }
 public videoview_proxy(Context context){ super(context); }
 public videoview_proxy(Context context, AttributeSet attrs){
     super(context, attrs); }

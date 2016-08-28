@@ -2,7 +2,6 @@ package org.hola.cdn_sdk;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
@@ -13,7 +12,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.SurfaceHolder;
 import android.view.WindowManager;
 import android.webkit.ConsoleMessage;
 import android.webkit.ValueCallback;
@@ -22,6 +20,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.VideoView;
+import com.google.android.exoplayer.ExoPlayer;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpRequest;
 import com.koushikdutta.async.http.AsyncHttpResponse;
@@ -38,7 +37,6 @@ import org.json.JSONObject;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Queue;
 import java.util.Vector;
 public class service extends Service {
@@ -512,7 +510,6 @@ MediaPlayer attach(MediaPlayer source){
     return (MediaPlayer) m_proxy;
 }
 VideoView attach(VideoView source){
-    Log.d(api.TAG, "VideoView attach");
     if (m_wv == null)
         return null;
     m_proxy = new videoview_proxy(this);
@@ -520,6 +517,24 @@ VideoView attach(VideoView source){
     m_js_proxy.set_proxy(m_proxy);
     send_message("attach", null);
     return (VideoView) m_proxy;
+}
+void attach(ExoPlayer player, String url){
+    if (m_wv == null)
+        return;
+    m_proxy = new exoplayer_proxy(url);
+    m_proxy.init(player, m_handler);
+    m_js_proxy.set_proxy(m_proxy);
+    send_message("attach", null);
+}
+void detach(){
+    Message msg = new Message();
+    Bundle state_data = new Bundle();
+    msg.what = service.MSG_STATE;
+    msg.arg1 = -1;
+    state_data.putString("old", m_proxy.get_state());
+    state_data.putString("new", "IDLE");
+    msg.setData(state_data);
+    m_handler.sendMessage(msg);
 }
 static final Field find_field(Object obj, Class<?> type){
     Class<?> obj_class = obj.getClass();

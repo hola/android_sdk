@@ -96,6 +96,7 @@ public int get_bitrate(){ return m_bitrate; }
 public void set_bitrate(int br){ m_bitrate = br; }
 public int get_bandwidth(){ return m_bandwidth; }
 public void set_bandwidth(int br){ m_bandwidth = br; }
+public String get_player_name(){ return "MediaPlayer"; }
 @Override
 public void setDisplay(SurfaceHolder sh){ m_player.setDisplay(sh); }
 @Override
