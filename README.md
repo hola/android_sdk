@@ -9,8 +9,7 @@ If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
 
 ## Initialization
 
-- On app start init HolaCDN by creating a new instance of
-  org.hola.cdn_sdk.api and calling init method.
+- On app start init HolaCDN by calling init method.
 
   Signature:
   void org.hola.cdn_sdk.init(Context ctx, String customer, Bundle extra,
@@ -59,6 +58,11 @@ for MediaPlayer object and HLS source is functional. Example:
       m_player = m_hola_cdn.attach(m_player);
 
 Afterwards, m_player instance can be used as a regular MediaPlayer object.
+
+Also, HolaCDN SDK supports:
+
+- VideoView+Google IMA (see imademo)
+- ExoPlayer+HLS (see exoplayerdemo)
 
 ## Reporting
 
