@@ -2,7 +2,7 @@
 
 This document describes integration of a native Android app to HolaCDN.
 
-- Currently supports MediaPlayer and VideoView.
+- Currently supports MediaPlayer, VideoView and ExoPlayer (HLS mode only)
 - Android version 4.4 and above is required.
 
 If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
