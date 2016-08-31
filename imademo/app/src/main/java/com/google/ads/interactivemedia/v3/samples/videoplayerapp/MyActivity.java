@@ -94,8 +94,7 @@ public class MyActivity extends ActionBarActivity {
             public void handleMessage(Message msg){
                 switch (msg.what)
                 {
-                case api.MSG_WEBSOCKET_CONNECTED:
-                    Log.d(TAG, "Web socket connected");
+                case api.MSG_HOLA_LOADED:
                     m_videoview = api.attach(m_videoview);
                     mVideoPlayer = (VideoPlayer) new SampleVideoPlayer(
                         m_videoview, VideoFragment.this.getActivity());

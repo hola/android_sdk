@@ -31,7 +31,6 @@ public String get_segment_info(String url){
     return m_service.get_segment_info(url); }
 @JavascriptInterface
 public String get_state(){ return m_proxy.get_state(); }
-// XXX pavelki: broken for HLS. Need to test for progressive
 @JavascriptInterface
 public int get_buffered(){ return 0; }
 @JavascriptInterface
@@ -68,4 +67,6 @@ public void fragment_data(int frag_id, int req_id){
 @JavascriptInterface
 public void wrapper_attached(){
     m_handler.sendEmptyMessage(service.MSG_ATTACHED); }
+int get_new_reqid(){ return m_reqid++; }
 }
+

@@ -46,6 +46,7 @@ static final int MSG_REMOVE = 3;
 static final int MSG_FRAGMENT = 4;
 static final int MSG_ATTACHED = 5;
 static final int MSG_TIMEUPDATE = 6;
+static final int MSG_GETMODE = 7;
 private boolean m_attached;
 private WebView m_wv;
 private WebSocket m_socket;
@@ -59,6 +60,7 @@ final private Vector<request_t> m_pending = new Vector<>(50);
 private Queue<String> m_msg_queue = new LinkedList<>();
 private Uri m_master;
 private Vector<level_info_t> m_levels = new Vector<>();
+private String m_mode;
 private class level_info_t {
     public int m_bitrate;
     public String m_url;
@@ -383,12 +385,22 @@ public void onCreate(){
             AsyncHttpServerResponse res)
         {
             String url_str = rebuild_url(req);
+            if (m_mode==null || m_mode.equals("n/a"))
+                m_handler.sendEmptyMessage(MSG_GETMODE);
             if (m_reqid > m_pending.size()-1)
                 m_pending.setSize(m_reqid+10);
             request_t in_request = new request_t(url_str, res);
             m_pending.setElementAt(in_request, m_reqid);
-            send_message("req", "\"url\":\""+url_str+"\",\"req_id\":"+
-                (m_reqid++));
+            if (m_mode==null || !m_mode.equals("cdn"))
+            {
+                new http_request_t(m_reqid++, m_js_proxy.get_new_reqid(),
+                    url_str);
+            }
+            else
+            {
+                send_message("req", "\"url\":\""+url_str+"\",\"req_id\":"+
+                    (m_reqid++));
+            }
         }
     });
     m_dataproxy.listen(5001);
@@ -432,6 +444,28 @@ public void onCreate(){
                     api_msg.arg1 = pos;
                     m_callback.sendMessage(api_msg);
                 }
+                break;
+            case MSG_GETMODE:
+                m_wv.evaluateJavascript("javascript:hola_cdn.get_mode()",
+                    new ValueCallback<String>(){
+                        @Override
+                        public void onReceiveValue(String s){
+                            if (s.equals("null"))
+                            {
+                                Message msg = m_handler
+                                    .obtainMessage(MSG_GETMODE);
+                                m_handler.sendMessageDelayed(msg, 100);
+                                return;
+                            }
+                            m_wv.setWebChromeClient(new console_adapter());
+                            if (m_mode==null && m_callback!=null)
+                            {
+                                m_callback
+                                    .sendEmptyMessage(api.MSG_HOLA_LOADED);
+                            }
+                            m_mode = s.substring(1, s.length()-1);
+                        }
+                    });
                 break;
             }
         }
@@ -481,7 +515,6 @@ void init(String customer, Bundle extra, Handler callback)
     m_callback = callback;
     m_wv = new WebView(this);
     WebSettings ws = m_wv.getSettings();
-    m_wv.setWebChromeClient(new console_adapter());
     ws.setJavaScriptEnabled(true);
     ws.setSupportZoom(false);
     ws.setUserAgentString(ws.getUserAgentString()+" CDNService/"
@@ -499,6 +532,7 @@ void init(String customer, Bundle extra, Handler callback)
     m_js_proxy = new js_proxy(m_handler, this);
     m_wv.addJavascriptInterface(m_js_proxy, "hola_java_proxy");
     m_wv.loadUrl(url);
+    m_handler.sendEmptyMessage(MSG_GETMODE);
 }
 MediaPlayer attach(MediaPlayer source){
     if (m_wv == null)

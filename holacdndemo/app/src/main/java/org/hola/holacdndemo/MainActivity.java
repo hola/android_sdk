@@ -36,7 +36,7 @@ private Handler m_callback = new Handler(){
     public void handleMessage(Message msg){
         switch (msg.what)
         {
-        case api.MSG_WEBSOCKET_CONNECTED:
+        case api.MSG_HOLA_LOADED:
             Log.d(TAG, "Web socket connected");
             m_player = MediaPlayer.create(MainActivity.this, Uri.parse(video),
                 m_holder);

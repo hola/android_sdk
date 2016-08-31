@@ -21,6 +21,7 @@ final static String TAG = "HolaCDN";
 public final static int MSG_SERVICE_CONNECTED = 1;
 public final static int MSG_WEBSOCKET_CONNECTED = 2;
 public final static int MSG_TIMEUPDATE = 3;
+public final static int MSG_HOLA_LOADED = 4;
 private static ServiceConnection m_conn = null;
 private static service m_service;
 private static Context m_ctx;
