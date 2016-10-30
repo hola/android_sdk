@@ -39,14 +39,7 @@ public boolean is_prepared(){ return m_proxy.is_prepared(); }
 public String get_player_name(){ return m_proxy.get_player_name(); }
 @JavascriptInterface
 public int fetch(String url, int frag_id){
-    Bundle bundle = new Bundle();
-    bundle.putString("url", url);
-    Message msg = new Message();
-    msg.what = service.MSG_RESPONSE;
-    msg.arg1 = frag_id;
-    msg.arg2 = m_reqid;
-    msg.setData(bundle);
-    m_handler.sendMessage(msg);
+    m_handler.sendMessage(build_fetch_msg(url, frag_id));
     return m_reqid++;
 }
 @JavascriptInterface
@@ -68,5 +61,15 @@ public void fragment_data(int frag_id, int req_id){
 public void wrapper_attached(){
     m_handler.sendEmptyMessage(service.MSG_ATTACHED); }
 int get_new_reqid(){ return m_reqid++; }
+Message build_fetch_msg(String url, int frag_id){
+    Bundle bundle = new Bundle();
+    bundle.putString("url", url);
+    Message msg = new Message();
+    msg.what = service.MSG_RESPONSE;
+    msg.arg1 = frag_id;
+    msg.arg2 = m_reqid;
+    msg.setData(bundle);
+    return msg;
+}
 }
 

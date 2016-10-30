@@ -35,9 +35,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.lang.reflect.Field;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Vector;
 public class service extends Service {
 static final int MSG_STATE = 1;
@@ -61,6 +63,7 @@ private Queue<String> m_msg_queue = new LinkedList<>();
 private Uri m_master;
 private Vector<level_info_t> m_levels = new Vector<>();
 private String m_mode;
+private Set<String> m_media_urls;
 private class level_info_t {
     public int m_bitrate;
     public String m_url;
@@ -91,9 +94,17 @@ private class http_request_t extends AsyncHttpClient.StringCallback
         m_fragid = frag_id;
         m_reqid = req_id;
         m_url = url;
+        request_t m_pending_request = m_pending.elementAt(m_fragid);
         m_starttime = System.currentTimeMillis();
-        m_parse = Uri.parse(url).getLastPathSegment().toLowerCase()
-            .endsWith("m3u8");
+        String urlfile = Uri.parse(url).getLastPathSegment().toLowerCase();
+        if (urlfile.endsWith(".mp4") || urlfile.endsWith(".ts"))
+            m_parse = false;
+        else if (urlfile.endsWith(".m3u8"))
+            m_parse = true;
+        else
+            m_parse = !m_media_urls.contains(m_pending_request.m_path);
+        Log.v(api.TAG, "request "+url+" "+m_pending_request.m_path+" "+
+            m_parse);
         AsyncHttpClient client = AsyncHttpClient.getDefaultInstance();
         if (m_parse)
         {
@@ -108,6 +119,8 @@ private class http_request_t extends AsyncHttpClient.StringCallback
     }
     @Override
     public void onConnectCompleted(Exception ex, AsyncHttpResponse response){
+        if (response==null)
+            return;
         send_messages(ex, response);
         request_t resp;
         if ((resp = get_clean())==null)
@@ -121,6 +134,8 @@ private class http_request_t extends AsyncHttpClient.StringCallback
     public void onCompleted(Exception e, AsyncHttpResponse response,
         String s)
     {
+        if (s==null)
+            return;
         level_info_t curr_level = new level_info_t();
         segment_info_t curr_segment = new segment_info_t();
         request_t resp;
@@ -168,21 +183,19 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                         m_master = Uri.parse(m_url);
                         m_levels.add(curr_level);
                     }
-                    curr_segment.m_duration = Float.valueOf(
-                        lines[i].substring(8, lines[i].indexOf(",")));
+                    curr_segment.m_duration = Float.valueOf(lines[i]
+                        .split(":|,", 3)[1]);
                 }
                 else if (!lines[i].startsWith("#"))
                 {
                     StringBuilder url_for_levels = new StringBuilder();
                     if (!lines[i].startsWith("http"))
                     {
-                        Uri base_uri = state==1 ?
-                            m_master : Uri.parse(curr_level.m_url);
-                        url_for_levels.append(base_uri.getScheme())
-                            .append("://").append(base_uri.getHost());
+                        url_for_levels.append(m_master.getScheme())
+                            .append("://").append(m_master.getHost());
                         if (!lines[i].startsWith("/"))
                         {
-                            List<String> p_segs = base_uri.getPathSegments();
+                            List<String> p_segs = m_master.getPathSegments();
                             p_segs = p_segs.subList(0, p_segs.size()-1);
                             for (String p_seg: p_segs)
                                 url_for_levels.append('/').append(p_seg);
@@ -190,18 +203,20 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                         }
                     }
                     url_for_levels.append(lines[i]);
-                    lines[i] = mangle_request(url_for_levels.toString());
+                    String media_url = url_for_levels.toString();
+                    lines[i] = mangle_request(media_url);
                     switch (state)
                     {
                     case 1:
-                        curr_level.m_url = url_for_levels.toString();
+                        curr_level.m_url = media_url;
                         m_levels.add(curr_level);
                         curr_level = new level_info_t();
                         break;
                     case 2:
-                        curr_segment.m_url = url_for_levels.toString();
+                        curr_segment.m_url = media_url;
                         curr_level.m_segments.add(curr_segment);
                         curr_segment = new segment_info_t();
+                        m_media_urls.add(media_url);
                         break;
                     }
                 }
@@ -361,6 +376,7 @@ private static String rebuild_url(AsyncHttpServerRequest request){
 public void onCreate(){
     super.onCreate();
     Log.i(api.TAG, "CDN Service is started");
+    m_media_urls = new HashSet<>();
     m_serverws.websocket("/mp", new AsyncHttpServer.WebSocketRequestCallback(){
         @Override
         public void onConnected(final WebSocket websocket,
@@ -399,7 +415,7 @@ public void onCreate(){
             else
             {
                 send_message("req", "\"url\":\""+url_str+"\",\"req_id\":"+
-                    (m_reqid++));
+                    (m_reqid++)+",\"force\":"+m_media_urls.contains(url_str));
             }
         }
     });

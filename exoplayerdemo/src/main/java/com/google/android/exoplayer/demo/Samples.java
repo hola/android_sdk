@@ -46,19 +46,7 @@ import java.util.Locale;
   }
 
   public static final Sample[] HLS = new Sample[] {
-    new Sample("Apple master playlist",
-        "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/"
-        + "bipbop_4x3_variant.m3u8", Util.TYPE_HLS),
-    new Sample("Apple master playlist advanced",
-        "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_16x9/"
-        + "bipbop_16x9_variant.m3u8", Util.TYPE_HLS),
-    new Sample("Apple TS media playlist",
-        "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear1/"
-        + "prog_index.m3u8", Util.TYPE_HLS),
-    new Sample("Apple AAC media playlist",
-        "https://devimages.apple.com.edgekey.net/streaming/examples/bipbop_4x3/gear0/"
-        + "prog_index.m3u8", Util.TYPE_HLS),
-    new Sample("Apple ID3 metadata", "http://devimages.apple.com/samplecode/adDemo/ad.m3u8",
+    new Sample("HLS-1", "http://player.h-cdn.org/static/hls/cdn2/master.m3u8",
         Util.TYPE_HLS),
   };
 
