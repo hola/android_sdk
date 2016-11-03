@@ -27,6 +27,8 @@ public int get_bandwidth(){ return m_proxy.get_bandwidth(); }
 @JavascriptInterface
 public String get_levels(){ return m_service.get_levels(); }
 @JavascriptInterface
+public int get_ws_socket(){ return m_service.m_ws_socket; }
+@JavascriptInterface
 public String get_segment_info(String url){
     return m_service.get_segment_info(url); }
 @JavascriptInterface

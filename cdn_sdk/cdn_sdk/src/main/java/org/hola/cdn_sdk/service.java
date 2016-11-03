@@ -35,6 +35,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.lang.reflect.Field;
+import java.net.ServerSocket;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -64,6 +65,8 @@ private Uri m_master;
 private Vector<level_info_t> m_levels = new Vector<>();
 private String m_mode;
 private Set<String> m_media_urls;
+static int m_ws_socket;
+private static int m_dp_socket;
 private class level_info_t {
     public int m_bitrate;
     public String m_url;
@@ -344,7 +347,7 @@ static String mangle_request(String url){
         "?"+parts[1] : "");
 }
 static String mangle_request(Uri uri){
-    String new_url = "http://127.0.0.1:5001/";
+    String new_url = "http://127.0.0.1:"+m_dp_socket+"/";
     String query, fragment;
     new_url += encodehex(uri.getScheme()+"://"+uri.getHost())+uri.getPath();
     if ((query = uri.getQuery()) != null)
@@ -393,7 +396,8 @@ public void onCreate(){
             }
         }
     });
-    m_serverws.listen(5000);
+    m_serverws.listen(m_ws_socket = find_free_port());
+    Log.d(api.TAG, "Listening websocket at "+m_ws_socket);
     m_dataproxy.get("/.*", new HttpServerRequestCallback(){
         private int m_reqid = 1;
         @Override
@@ -419,7 +423,8 @@ public void onCreate(){
             }
         }
     });
-    m_dataproxy.listen(5001);
+    m_dataproxy.listen(m_dp_socket = find_free_port());
+    Log.d(api.TAG, "Listening dataproxy at "+m_dp_socket);
     m_handler = new Handler(){
         @Override
         public void handleMessage(Message msg){
@@ -623,4 +628,12 @@ void send_message(String cmd, String data){
 }
 boolean is_ws(){ return m_socket!=null; }
 boolean is_attached(){ return m_attached; }
+private int find_free_port(){
+    try {
+        ServerSocket socket = new ServerSocket(0);
+        int port = socket.getLocalPort();
+        socket.close();
+        return port;
+    } catch(Exception e){ return 0; }
+}
 }
