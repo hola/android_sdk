@@ -50,6 +50,7 @@ static final int MSG_FRAGMENT = 4;
 static final int MSG_ATTACHED = 5;
 static final int MSG_TIMEUPDATE = 6;
 static final int MSG_GETMODE = 7;
+static final int MSG_DETACHED = 8;
 private boolean m_attached;
 private WebView m_wv;
 private WebSocket m_socket;
@@ -64,7 +65,7 @@ private Queue<String> m_msg_queue = new LinkedList<>();
 private Uri m_master;
 private Vector<level_info_t> m_levels = new Vector<>();
 private String m_mode;
-private Set<String> m_media_urls;
+private Set<String> m_media_urls = new HashSet<>();
 static int m_ws_socket;
 private static int m_dp_socket;
 private class level_info_t {
@@ -281,6 +282,14 @@ private JSONObject segment_to_json(level_info_t li, segment_info_t si){
         send_perr("seginf_json_error", "\"msg\":\""+e.getMessage()+"\""); }
     return jo;
 }
+private void init_metadata(){
+    m_pending.clear();
+    m_media_urls = new HashSet<>();
+    m_msg_queue = new LinkedList<>();
+    m_levels = new Vector<>();
+    m_mode = null;
+    m_master = null;
+}
 String get_segment_info(String url){
     JSONObject jo;
     for (level_info_t li: m_levels)
@@ -378,8 +387,8 @@ private static String rebuild_url(AsyncHttpServerRequest request){
 @Override
 public void onCreate(){
     super.onCreate();
+    init_metadata();
     Log.i(api.TAG, "CDN Service is started");
-    m_media_urls = new HashSet<>();
     m_serverws.websocket("/mp", new AsyncHttpServer.WebSocketRequestCallback(){
         @Override
         public void onConnected(final WebSocket websocket,
@@ -455,6 +464,10 @@ public void onCreate(){
                 new http_request_t(msg.arg1, msg.arg2, url);
                 break;
             case MSG_ATTACHED: m_attached = true; break;
+            case MSG_DETACHED:
+                m_attached = false;
+                init_metadata();
+                break;
             case MSG_TIMEUPDATE:
                 int pos = m_proxy.getCurrentPosition();
                 send_message("time", "\"pos\":"+pos);
@@ -590,6 +603,7 @@ void detach(){
     state_data.putString("new", "IDLE");
     msg.setData(state_data);
     m_handler.sendMessage(msg);
+    m_handler.sendEmptyMessage(service.MSG_DETACHED);
 }
 static final Field find_field(Object obj, Class<?> type){
     Class<?> obj_class = obj.getClass();
