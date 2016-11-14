@@ -27,7 +27,7 @@ public int get_bandwidth(){ return m_proxy.get_bandwidth(); }
 @JavascriptInterface
 public String get_levels(){ return m_service.get_levels(); }
 @JavascriptInterface
-public int get_ws_socket(){ return m_service.m_ws_socket; }
+public int get_ws_socket(){ return -1; }
 @JavascriptInterface
 public String get_segment_info(String url){
     return m_service.get_segment_info(url); }
@@ -49,14 +49,6 @@ public void fetch_remove(int req_id){
     Message msg = new Message();
     msg.what = service.MSG_REMOVE;
     msg.arg1 = req_id;
-    m_handler.sendMessage(msg);
-}
-@JavascriptInterface
-public void fragment_data(int frag_id, int req_id){
-    Message msg = new Message();
-    msg.what = service.MSG_FRAGMENT;
-    msg.arg1 = frag_id;
-    msg.arg2 = req_id;
     m_handler.sendMessage(msg);
 }
 @JavascriptInterface

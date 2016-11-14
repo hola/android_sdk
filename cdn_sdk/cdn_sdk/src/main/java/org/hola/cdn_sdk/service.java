@@ -24,7 +24,6 @@ import com.google.android.exoplayer.ExoPlayer;
 import com.koushikdutta.async.http.AsyncHttpClient;
 import com.koushikdutta.async.http.AsyncHttpRequest;
 import com.koushikdutta.async.http.AsyncHttpResponse;
-import com.koushikdutta.async.http.WebSocket;
 import com.koushikdutta.async.http.callback.HttpConnectCallback;
 import com.koushikdutta.async.http.server.AsyncHttpServer;
 import com.koushikdutta.async.http.server.AsyncHttpServerRequest;
@@ -46,14 +45,14 @@ public class service extends Service {
 static final int MSG_STATE = 1;
 static final int MSG_RESPONSE = 2;
 static final int MSG_REMOVE = 3;
-static final int MSG_FRAGMENT = 4;
 static final int MSG_ATTACHED = 5;
 static final int MSG_TIMEUPDATE = 6;
 static final int MSG_GETMODE = 7;
 static final int MSG_DETACHED = 8;
+static final int MSG_CHECK_HOLA = 9;
 private boolean m_attached;
 private WebView m_wv;
-private WebSocket m_socket;
+private boolean m_hola_connected = false;
 private proxy_api m_proxy;
 private js_proxy m_js_proxy;
 private Handler m_handler;
@@ -66,7 +65,6 @@ private Uri m_master;
 private Vector<level_info_t> m_levels = new Vector<>();
 private String m_mode;
 private Set<String> m_media_urls = new HashSet<>();
-static int m_ws_socket;
 private static int m_dp_socket;
 private class level_info_t {
     public int m_bitrate;
@@ -264,8 +262,11 @@ private class http_request_t extends AsyncHttpClient.StringCallback
     }
     private request_t get_clean(){
         request_t resp;
-        if ((resp = m_pending.elementAt(m_fragid)) == null)
+        if (m_pending.size() <= m_fragid
+            || (resp = m_pending.elementAt(m_fragid)) == null)
+        {
             return null;
+        }
         m_pending.setElementAt(null, m_fragid);
         return resp;
     }
@@ -344,9 +345,12 @@ private class console_adapter extends WebChromeClient {
     public boolean onConsoleMessage(ConsoleMessage consoleMessage){
         String source = consoleMessage.sourceId();
         source = Uri.parse(source).getLastPathSegment();
-        Log.i(api.TAG+"/JS", consoleMessage.messageLevel().name()+":"+
-            source+":"+consoleMessage.lineNumber()+" "+
-            consoleMessage.message());
+        if (!consoleMessage.message().contains("hola_cdn is not defined"))
+        {
+            Log.i(api.TAG+"/JS", consoleMessage.messageLevel().name()+":"+
+                source+":"+consoleMessage.lineNumber()+" "+
+                consoleMessage.message());
+        }
         return true;
     }
 }
@@ -389,24 +393,6 @@ public void onCreate(){
     super.onCreate();
     init_metadata();
     Log.i(api.TAG, "CDN Service is started");
-    m_serverws.websocket("/mp", new AsyncHttpServer.WebSocketRequestCallback(){
-        @Override
-        public void onConnected(final WebSocket websocket,
-            AsyncHttpServerRequest request)
-        {
-            Log.i(api.TAG, "WebSocket connected");
-            m_socket = websocket;
-            if (m_callback!=null)
-                m_callback.sendEmptyMessage(api.MSG_WEBSOCKET_CONNECTED);
-            if (m_msg_queue.size()>0)
-            {
-                for (String msg: m_msg_queue)
-                    m_socket.send(msg);
-            }
-        }
-    });
-    m_serverws.listen(m_ws_socket = find_free_port());
-    Log.d(api.TAG, "Listening websocket at "+m_ws_socket);
     m_dataproxy.get("/.*", new HttpServerRequestCallback(){
         private int m_reqid = 1;
         @Override
@@ -491,7 +477,6 @@ public void onCreate(){
                                 m_handler.sendMessageDelayed(msg, 100);
                                 return;
                             }
-                            m_wv.setWebChromeClient(new console_adapter());
                             if (m_mode==null && m_callback!=null)
                             {
                                 m_callback
@@ -501,9 +486,38 @@ public void onCreate(){
                         }
                     });
                 break;
+            case MSG_CHECK_HOLA:
+                if (m_hola_connected)
+                    return;
+                m_wv.evaluateJavascript("javascript:hola_cdn && typeof " +
+                    "hola_cdn.android_message", new ValueCallback<String>()
+                {
+                    @Override
+                    public void onReceiveValue(String s){
+                        if (!s.equals("\"function\""))
+                            return;
+                        synchronized(m_msg_queue){
+                            if (m_callback!=null && !m_hola_connected)
+                            {
+                                m_callback.sendEmptyMessage(api
+                                    .MSG_WEBSOCKET_CONNECTED);
+                            }
+                            m_hola_connected = true;
+                            if (m_msg_queue.size()>0)
+                            {
+                                for (String msg: m_msg_queue)
+                                    send_message(msg);
+                                m_msg_queue.clear();
+                            }
+                        }
+                    }
+                });
+                Message new_msg = m_handler.obtainMessage(MSG_CHECK_HOLA);
+                m_handler.sendMessageDelayed(new_msg, 250);
             }
         }
     };
+    m_handler.sendMessageDelayed(m_handler.obtainMessage(MSG_CHECK_HOLA), 100);
 }
 @Override
 public void onDestroy(){
@@ -565,6 +579,7 @@ void init(String customer, Bundle extra, Handler callback)
     }
     m_js_proxy = new js_proxy(m_handler, this);
     m_wv.addJavascriptInterface(m_js_proxy, "hola_java_proxy");
+    m_wv.setWebChromeClient(new console_adapter());
     m_wv.loadUrl(url);
     m_handler.sendEmptyMessage(MSG_GETMODE);
 }
@@ -631,16 +646,23 @@ static final Object get_field(Object obj, Class<?> type){
     return null;
 }
 void send_message(String cmd, String data){
-    String msg = "{\"cmd\":\""+cmd+"\"";
-    if (data!=null)
-        msg += ","+data;
-    msg += "}";
-    if (m_socket!=null)
-        m_socket.send(msg);
-    else
-        m_msg_queue.add(msg);
+    final String msg = "{\"cmd\":\""+cmd+"\""+(data!=null ? ","+data : "")+"}";
+    m_handler.post(new Runnable() {
+        @Override
+        public void run(){ send_message(msg); }
+    });
 }
-boolean is_ws(){ return m_socket!=null; }
+private void send_message(String msg){
+    if (m_hola_connected)
+    {
+        m_wv.evaluateJavascript("javascript:hola_cdn.android_message('"+msg+
+            "')", null);
+        return;
+    }
+    synchronized(m_msg_queue){
+        m_msg_queue.add(msg); }
+}
+boolean is_ws(){ return m_hola_connected; }
 boolean is_attached(){ return m_attached; }
 private int find_free_port(){
     try {
