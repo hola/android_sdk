@@ -195,6 +195,8 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                     {
                         url_for_levels.append(m_master.getScheme())
                             .append("://").append(m_master.getHost());
+                        if (m_master.getPort()!=-1)
+                            url_for_levels.append(":"+m_master.getPort());
                         if (!lines[i].startsWith("/"))
                         {
                             List<String> p_segs = m_master.getPathSegments();
@@ -362,7 +364,9 @@ static String mangle_request(String url){
 static String mangle_request(Uri uri){
     String new_url = "http://127.0.0.1:"+m_dp_socket+"/";
     String query, fragment;
-    new_url += encodehex(uri.getScheme()+"://"+uri.getHost())+uri.getPath();
+    int port = uri.getPort();
+    new_url += encodehex(uri.getScheme()+"://"+uri.getHost()
+        +(port<0 ? "" : ":"+port))+uri.getPath();
     if ((query = uri.getQuery()) != null)
         new_url += "?"+query;
     if ((fragment = uri.getFragment()) != null)
