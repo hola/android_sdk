@@ -75,9 +75,9 @@ public static HttpDataSource attach(ExoPlayer player, String user_agent,
     if (m_service==null)
         return null;
     m_service.attach(player, url);
-    return new exoplayer_data_source(new DefaultHttpDataSource(user_agent,
+    return new exoplayer_data_source(user_agent,
         null,b_meter, DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
-        DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS, false));
+        DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS, false);
 }
 public static void detach(){
     if (m_service!=null)

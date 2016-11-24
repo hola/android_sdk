@@ -446,6 +446,8 @@ public void onCreate(){
             case MSG_RESPONSE:
                 data = msg.peekData();
                 String url = data.getString("url");
+                if (m_pending.size() <= msg.arg1)
+                    return;
                 if (m_pending.elementAt(msg.arg1) == null)
                 {
                     Log.e(api.TAG, "unknown req_id " + msg.arg1);
