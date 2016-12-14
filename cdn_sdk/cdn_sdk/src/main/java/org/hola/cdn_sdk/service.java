@@ -63,6 +63,7 @@ final private Vector<request_t> m_pending = new Vector<>(50);
 private Queue<String> m_msg_queue = new LinkedList<>();
 private Uri m_master;
 private Vector<level_info_t> m_levels = new Vector<>();
+private boolean m_live = false;
 private String m_mode;
 private Set<String> m_media_urls = new HashSet<>();
 private static int m_dp_socket;
@@ -157,6 +158,8 @@ private class http_request_t extends AsyncHttpClient.StringCallback
             send_perr("hls_playlist_error", "\"url\":\""+m_url+"\"");
         else
         {
+            boolean endlist = false;
+            boolean extinf = false;
             for (int i = 1; i < lines.length; i++)
             {
                 if (lines[i].startsWith("#EXT-X-STREAM-INF"))
@@ -176,6 +179,7 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                 }
                 else if (lines[i].startsWith("#EXTINF"))
                 {
+                    extinf = true;
                     // no top-level manifest, create a fake one
                     if (state==1)
                     {
@@ -188,6 +192,8 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                     curr_segment.m_duration = Float.valueOf(lines[i]
                         .split(":|,", 3)[1]);
                 }
+                else if (lines[i].startsWith("#EXT-X-ENDLIST"))
+                    endlist = true;
                 else if (!lines[i].startsWith("#"))
                 {
                     StringBuilder url_for_levels = new StringBuilder();
@@ -225,6 +231,7 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                     }
                 }
             }
+            m_live = extinf && !endlist;
         }
         resp.m_response.send(TextUtils.join("\n", lines));
     }
@@ -292,6 +299,7 @@ private void init_metadata(){
     m_levels = new Vector<>();
     m_mode = null;
     m_master = null;
+    m_live = false;
 }
 String get_segment_info(String url){
     JSONObject jo;
@@ -326,6 +334,7 @@ String get_levels(){
         send_perr("lvlinf_json_error", "\"msg\":\""+e.getMessage()+"\""); }
     return jo.toString();
 }
+boolean is_live_stream(){ return  m_live; }
 void get_stats(){
     if (m_wv==null)
         return;

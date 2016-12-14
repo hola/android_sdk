@@ -27,6 +27,8 @@ public int get_bandwidth(){ return m_proxy.get_bandwidth(); }
 @JavascriptInterface
 public String get_levels(){ return m_service.get_levels(); }
 @JavascriptInterface
+public boolean is_live_stream(){ return m_service.is_live_stream(); }
+@JavascriptInterface
 public int get_ws_socket(){ return -1; }
 @JavascriptInterface
 public String get_segment_info(String url){
