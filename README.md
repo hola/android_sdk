@@ -14,10 +14,10 @@ If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
 - On app start init HolaCDN by calling init method.
 
   Signature:
-```java
-void org.hola.cdn_sdk.init(Context ctx, String customer, Bundle extra,
-    Handler callback);
-```
+  ```java
+  void org.hola.cdn_sdk.init(Context ctx, String customer, Bundle extra,
+      Handler callback);
+  ```
 
 - Initialization occurs asynchronically. During that process two messages may
   be send to callback handler (with different "what" properties):
@@ -40,17 +40,17 @@ void org.hola.cdn_sdk.init(Context ctx, String customer, Bundle extra,
 
 - init example (inside an Activity):
 
-```java
-org.hola.cdn_sdk.api m_hola_cdn = new org.hola.cdn_sdk.api();
-Handler m_callback = new Handler(){
-    @Override
-    public void handleMessage(Message msg){
-        Log.d("Demo", Integer.toString(msg.what); }
-};
-Bundle extra = new Bundle();
-extra.putString("hola_mode", "origin_cdn");
-m_hola_cdn.init(this, "demo", extra, m_callback);
-```
+  ```java
+  org.hola.cdn_sdk.api m_hola_cdn = new org.hola.cdn_sdk.api();
+  Handler m_callback = new Handler(){
+      @Override
+      public void handleMessage(Message msg){
+          Log.d("Demo", Integer.toString(msg.what); }
+  };
+  Bundle extra = new Bundle();
+  extra.putString("hola_mode", "origin_cdn");
+  m_hola_cdn.init(this, "demo", extra, m_callback);
+  ```
 
 ## Attaching
 
