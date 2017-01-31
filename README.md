@@ -38,6 +38,7 @@ If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
 
 - init example (inside an Activity):
 
+```java
   org.hola.cdn_sdk.api m_hola_cdn = new org.hola.cdn_sdk.api();
   Handler m_callback = new Handler(){
       @Override
@@ -47,17 +48,20 @@ If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
   Bundle extra = new Bundle();
   extra.putString("hola_mode", "stats");
   m_hola_cdn.init(this, "demo", extra, m_callback);
+```
 
 ## Attaching
 
 Attachment is required to activate HolaCDN features. At the moment, cdn mode
 for MediaPlayer object and HLS source is functional. Example:
 
+```java
   MediaPlayer m_player = new MediaPlayer();
   if (!m_hola_cdn.is_connected())
       Log.d("Demo", "HolaCDN isn't connected, skip attaching");
   else
       m_player = m_hola_cdn.attach(m_player);
+```
 
 Afterwards, m_player instance can be used as a regular MediaPlayer object.
 
