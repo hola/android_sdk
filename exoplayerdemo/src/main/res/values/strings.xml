@@ -53,6 +53,6 @@
 
   <string name="storage_permission_denied">Permission to access storage was denied</string>
   <string name="customer">demo</string>
-  <string name="hola_mode">cdn</string>
+  <string name="hola_mode">hola_cdn</string>
   <string name="hola_zone">portal</string>
 </resources>

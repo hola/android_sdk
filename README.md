@@ -46,14 +46,14 @@ If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
           Log.d("Demo", Integer.toString(msg.what); }
   };
   Bundle extra = new Bundle();
-  extra.putString("hola_mode", "stats");
+  extra.putString("hola_mode", "origin_cdn");
   m_hola_cdn.init(this, "demo", extra, m_callback);
 ```
 
 ## Attaching
 
-Attachment is required to activate HolaCDN features. At the moment, cdn mode
-for MediaPlayer object and HLS source is functional. Example:
+Attachment is required to activate HolaCDN features. At the moment, hola_cdn
+mode for MediaPlayer object and HLS source is functional. Example:
 
 ```java
   MediaPlayer m_player = new MediaPlayer();
