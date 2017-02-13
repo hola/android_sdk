@@ -7,7 +7,7 @@ This document describes integration of a native Android app to HolaCDN.
 
 Note: An [iOS version] (https://github.com/hola/ios_sdk) is also available.
 
-If you have any questions, email us at cdn-help@hola.org, or skype: holacdn
+If you have any questions, email us at cdnsupport@hola.org, or skype: holacdn
 
 ## Initialization
 
