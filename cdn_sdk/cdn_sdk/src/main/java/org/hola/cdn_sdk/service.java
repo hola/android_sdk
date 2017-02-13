@@ -1,6 +1,8 @@
 package org.hola.cdn_sdk;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -679,6 +681,10 @@ private void send_message(String msg){
 }
 boolean is_ws(){ return m_hola_connected; }
 boolean is_attached(){ return m_attached; }
+String get_app_label(){
+    PackageManager pm = this.getPackageManager();
+    return (String) pm.getApplicationLabel(this.getApplicationInfo());
+}
 private int find_free_port(){
     try {
         ServerSocket socket = new ServerSocket(0);

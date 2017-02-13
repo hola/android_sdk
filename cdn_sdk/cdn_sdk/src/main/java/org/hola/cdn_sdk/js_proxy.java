@@ -40,6 +40,8 @@ public int get_buffered(){ return 0; }
 @JavascriptInterface
 public boolean is_prepared(){ return m_proxy.is_prepared(); }
 @JavascriptInterface
+public String get_app_label(){ return m_service.get_app_label(); }
+@JavascriptInterface
 public String get_player_name(){ return m_proxy.get_player_name(); }
 @JavascriptInterface
 public int fetch(String url, int frag_id){
