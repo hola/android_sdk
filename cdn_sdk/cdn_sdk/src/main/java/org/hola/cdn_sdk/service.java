@@ -203,13 +203,14 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                     StringBuilder url_for_levels = new StringBuilder();
                     if (!lines[i].startsWith("http"))
                     {
-                        url_for_levels.append(m_master.getScheme())
-                            .append("://").append(m_master.getHost());
-                        if (m_master.getPort()!=-1)
-                            url_for_levels.append(":"+m_master.getPort());
+                        Uri parent_url = Uri.parse(m_url);
+                        url_for_levels.append(parent_url.getScheme())
+                            .append("://").append(parent_url.getHost());
+                        if (parent_url.getPort()!=-1)
+                            url_for_levels.append(":"+parent_url.getPort());
                         if (!lines[i].startsWith("/"))
                         {
-                            List<String> p_segs = m_master.getPathSegments();
+                            List<String> p_segs = parent_url.getPathSegments();
                             p_segs = p_segs.subList(0, p_segs.size()-1);
                             for (String p_seg: p_segs)
                                 url_for_levels.append('/').append(p_seg);
