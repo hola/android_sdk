@@ -164,6 +164,8 @@ private class http_request_t extends AsyncHttpClient.StringCallback
             boolean extinf = false;
             for (int i = 1; i < lines.length; i++)
             {
+                if (lines[i].isEmpty())
+                    continue;
                 if (lines[i].startsWith("#EXT-X-STREAM-INF"))
                 {
                     int bw_pos;
