@@ -36,7 +36,7 @@ public String get_segment_info(String url){
 @JavascriptInterface
 public String get_state(){ return m_proxy.get_state(); }
 @JavascriptInterface
-public int get_buffered(){ return 0; }
+public String get_buffered(){ return m_proxy.get_buffered(); }
 @JavascriptInterface
 public boolean is_prepared(){ return m_proxy.is_prepared(); }
 @JavascriptInterface

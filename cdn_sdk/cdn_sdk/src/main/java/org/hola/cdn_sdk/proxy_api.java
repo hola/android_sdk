@@ -6,10 +6,11 @@ public int getCurrentPosition();
 public String get_url();
 public int get_bitrate();
 public int get_bandwidth();
+public String get_buffered();
 public String get_state();
 public boolean is_prepared();
 public void set_bitrate(int br);
 public void set_bandwidth(int br);
-public void init(Object source, Handler handler);
+public void init(Object source, Handler handler, service service);
 public String get_player_name();
 }

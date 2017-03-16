@@ -1,7 +1,6 @@
 package org.hola.cdn_sdk;
 import android.app.Service;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
 import android.media.MediaPlayer;
@@ -37,11 +36,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.lang.reflect.Field;
 import java.net.ServerSocket;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.Set;
 import java.util.Vector;
 public class service extends Service {
 static final int MSG_STATE = 1;
@@ -67,20 +66,24 @@ private Uri m_master;
 private Vector<level_info_t> m_levels = new Vector<>();
 private boolean m_live = false;
 private String m_mode;
-private Set<String> m_media_urls = new HashSet<>();
+private String m_state;
+private HashMap<String, segment_info_t> m_media_urls = new HashMap<>();
 private static int m_dp_socket;
+private float[] m_buffered = {0, 0};
 private class level_info_t {
     public int m_bitrate;
     public String m_url;
     public Vector<segment_info_t> m_segments = new Vector<>();
 }
 private class segment_info_t {
+    public float m_start;
     public float m_duration;
     public String m_url;
 }
 private class request_t {
-    public String m_path;
-    public AsyncHttpServerResponse m_response;
+    public final String m_path;
+    public final AsyncHttpServerResponse m_response;
+    public segment_info_t m_seg;
     public request_t(String path, AsyncHttpServerResponse res){
         m_path = path;
         m_response = res;
@@ -96,18 +99,22 @@ private class http_request_t extends AsyncHttpClient.StringCallback
     private boolean m_parse;
     private long m_starttime;
     public http_request_t(int frag_id, int req_id, String url){
+        segment_info_t seg = null;
         m_fragid = frag_id;
         m_reqid = req_id;
         m_url = url;
         request_t m_pending_request = m_pending.elementAt(m_fragid);
         m_starttime = System.currentTimeMillis();
         String urlfile = Uri.parse(url).getLastPathSegment().toLowerCase();
+        if (m_media_urls.containsKey(m_pending_request.m_path))
+            seg = m_media_urls.get(m_pending_request.m_path);
         if (urlfile.endsWith(".mp4") || urlfile.endsWith(".ts"))
             m_parse = false;
         else if (urlfile.endsWith(".m3u8"))
             m_parse = true;
         else
-            m_parse = !m_media_urls.contains(m_pending_request.m_path);
+            m_parse = seg==null;
+        m_pending_request.m_seg = seg;
         Log.v(api.TAG, "request "+url+" "+m_pending_request.m_path+" "+
             m_parse);
         AsyncHttpClient client = AsyncHttpClient.getDefaultInstance();
@@ -133,6 +140,15 @@ private class http_request_t extends AsyncHttpClient.StringCallback
         long req_dur = System.currentTimeMillis()-m_starttime;
         m_proxy.set_bitrate(get_url_level(resp.m_path).m_bitrate);
         m_proxy.set_bandwidth((int)(m_bytes*8000/req_dur));
+        float start = resp.m_seg.m_start;
+        float end = start+resp.m_seg.m_duration;
+        if (m_buffered[0] == 0 && m_buffered[1] == 0)
+        {
+            m_buffered[0] = start;
+            m_buffered[1] = end;
+        }
+        if (start-0.5<m_buffered[1] && start>m_buffered[0])
+            m_buffered[1] = Math.max(end, m_buffered[1]);
         resp.m_response.proxy(response);
     }
     @Override
@@ -147,6 +163,7 @@ private class http_request_t extends AsyncHttpClient.StringCallback
         if ((resp = get_clean()) == null)
             return;
         int state = get_url_state(m_url);
+        float start = 0;
         switch (state)
         {
         case 1:
@@ -193,8 +210,10 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                         m_master = Uri.parse(m_url);
                         m_levels.add(curr_level);
                     }
+                    curr_segment.m_start = start;
                     curr_segment.m_duration = Float.valueOf(lines[i]
                         .split(":|,", 3)[1]);
+                    start += curr_segment.m_duration;
                 }
                 else if (lines[i].startsWith("#EXT-X-ENDLIST"))
                     endlist = true;
@@ -230,8 +249,8 @@ private class http_request_t extends AsyncHttpClient.StringCallback
                     case 2:
                         curr_segment.m_url = media_url;
                         curr_level.m_segments.add(curr_segment);
+                        m_media_urls.put(media_url, curr_segment);
                         curr_segment = new segment_info_t();
-                        m_media_urls.add(media_url);
                         break;
                     }
                 }
@@ -299,7 +318,7 @@ private JSONObject segment_to_json(level_info_t li, segment_info_t si){
 }
 private void init_metadata(){
     m_pending.clear();
-    m_media_urls = new HashSet<>();
+    m_media_urls = new HashMap<>();
     m_msg_queue = new LinkedList<>();
     m_levels = new Vector<>();
     m_mode = null;
@@ -344,6 +363,16 @@ void get_stats(){
     if (m_wv==null)
         return;
     m_wv.evaluateJavascript("javascript:hola_cdn.get_stats()",
+        new ValueCallback<String>(){
+            @Override
+            public void onReceiveValue(String s){
+                Log.d(api.TAG, s); }
+        });
+}
+void bug_report(){
+    if (m_wv==null)
+        return;
+    m_wv.evaluateJavascript("javascript:hola_cdn.bug_report(true)",
         new ValueCallback<String>(){
             @Override
             public void onReceiveValue(String s){
@@ -431,8 +460,9 @@ public void onCreate(){
             }
             else
             {
-                send_message("req", "\"url\":\""+url_str+"\",\"req_id\":"+
-                    (m_reqid++)+",\"force\":"+m_media_urls.contains(url_str));
+                send_message("req", "\"url\":\""+url_str+"\",\"req_id\":"
+                    +(m_reqid++)+",\"force\":"
+                    +m_media_urls.containsKey(url_str));
             }
         }
     });
@@ -449,11 +479,24 @@ public void onCreate(){
                 String old_state = data.getString("old");
                 String new_state = data.getString("new");
                 Log.d(api.TAG, "State changed: "+old_state+" to "+new_state);
+                m_state = new_state;
                 if (new_state.equals(old_state))
                     return;
                 String ws_message = "\"data\":\""+new_state+'|'+old_state;
                 if (new_state.equals("SEEKING"))
-                    ws_message += '|' + Integer.toString(msg.arg1);
+                {
+                    ws_message += '|'+Integer.toString(msg.arg1);
+                    m_buffered[0] = m_buffered[1] = 0;
+                }
+                if (new_state.equals("SEEKED"))
+                {
+                    float pos = m_proxy.getCurrentPosition()/1000.0f;
+                    if (pos<m_buffered[0] || pos>m_buffered[1])
+                    {
+                        m_buffered[0] = Math.min(m_buffered[0], pos);
+                        m_buffered[1] = Math.max(m_buffered[1], pos);
+                    }
+                }
                 ws_message += "\"";
                 send_message("state", ws_message);
                 break;
@@ -607,7 +650,7 @@ MediaPlayer attach(MediaPlayer source){
     if (m_wv == null)
         return null;
     m_proxy = new mplayer_proxy();
-    m_proxy.init(source, m_handler);
+    m_proxy.init(source, m_handler, this);
     m_js_proxy.set_proxy(m_proxy);
     send_message("attach", null);
     return (MediaPlayer) m_proxy;
@@ -616,7 +659,7 @@ VideoView attach(VideoView source){
     if (m_wv == null)
         return null;
     m_proxy = new videoview_proxy(this);
-    m_proxy.init(source, m_handler);
+    m_proxy.init(source, m_handler, this);
     m_js_proxy.set_proxy(m_proxy);
     send_message("attach", null);
     return (VideoView) m_proxy;
@@ -625,7 +668,7 @@ void attach(ExoPlayer player, String url){
     if (m_wv == null)
         return;
     m_proxy = new exoplayer_proxy(url);
-    m_proxy.init(player, m_handler);
+    m_proxy.init(player, m_handler, this);
     m_js_proxy.set_proxy(m_proxy);
     send_message("attach", null);
 }
@@ -671,6 +714,12 @@ void send_message(String cmd, String data){
         @Override
         public void run(){ send_message(msg); }
     });
+}
+String get_buffered(){
+    float pos = m_proxy.getCurrentPosition()/1000.0f;
+    return m_state.equals("SEEKING") ? "[["+pos+','+pos+"]]" :
+        "[["+Math.max(m_buffered[0], pos)+','
+        +Math.max(m_buffered[1], pos)+"]]";
 }
 private void send_message(String msg){
     if (m_hola_connected)

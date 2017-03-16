@@ -65,6 +65,7 @@ private MediaPlayer.OnCompletionListener m_completion_listener = null;
 private MediaPlayer.OnSeekCompleteListener m_seek_listener = null;
 private int m_bitrate;
 private int m_bandwidth;
+private service m_service;
 private thread_t m_timeupdate = new thread_t();
 private class thread_t implements Runnable {
     private volatile Thread executor;
@@ -85,17 +86,18 @@ private class thread_t implements Runnable {
         }
     }
 }
-public void init(Object source, Handler hnd){
+public void init(Object source, Handler hnd, service service){
     m_vview = (VideoView) source;
     m_handler = hnd;
+    m_service = service;
     update_state(m_vview.isPlaying() ? "PLAYING" : "IDLE");
     m_vview.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
         @Override
         public void onPrepared(MediaPlayer m_player){
             videoview_proxy.this.m_prepared = true;
             videoview_proxy.this.update_state("STARTING");
-            MediaPlayer internal_mp = (MediaPlayer) service.get_field(m_vview,
-                MediaPlayer.class);
+            MediaPlayer internal_mp = (MediaPlayer) m_service.get_field(
+                m_vview, MediaPlayer.class);
             internal_mp.setOnSeekCompleteListener(
             new MediaPlayer.OnSeekCompleteListener(){
                 @Override
@@ -142,6 +144,8 @@ private void update_state(String new_state, int param){
 public int get_bitrate(){ return m_bitrate; }
 public void set_bitrate(int br){ m_bitrate = br; }
 public int get_bandwidth(){ return m_bandwidth; }
+@Override
+public String get_buffered(){ return m_service.get_buffered(); }
 public void set_bandwidth(int br){ m_bandwidth = br; }
 public String get_player_name(){ return "VideoView"; }
 public videoview_proxy(Context context){ super(context); }

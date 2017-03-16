@@ -22,6 +22,7 @@ private OnSeekCompleteListener m_seek_listener = null;
 private int m_bitrate;
 private int m_bandwidth;
 private thread_t m_timeupdate = new thread_t();
+private service m_service;
 private class thread_t implements Runnable {
     private volatile Thread executor;
     public void start(){
@@ -41,7 +42,8 @@ private class thread_t implements Runnable {
         }
     }
 }
-public void init(Object source, Handler hnd){
+public void init(Object source, Handler hnd, service service){
+    m_service = service;
     m_player = (MediaPlayer) source;
     m_handler = hnd;
     update_state(m_player.isPlaying() ? "PLAYING" : "IDLE");
@@ -259,6 +261,8 @@ public void deselectTrack(int index) throws IllegalStateException
 {
     m_player.deselectTrack(index);
 }
+@Override
+public String get_buffered(){ return m_service.get_buffered(); }
 @Override
 public void setOnPreparedListener(OnPreparedListener listener){
     m_prepared_listener = listener; }

@@ -76,7 +76,7 @@ public static HttpDataSource attach(ExoPlayer player, String user_agent,
         return null;
     m_service.attach(player, url);
     return new exoplayer_data_source(user_agent,
-        null,b_meter, DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
+        null, b_meter, DefaultHttpDataSource.DEFAULT_CONNECT_TIMEOUT_MILLIS,
         DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS, false);
 }
 public static void detach(){
@@ -91,4 +91,5 @@ public static boolean is_attached(){
 public static void send_message(String msg, String data){
     m_service.send_message(msg, data); }
 public static void get_stats(){ m_service.get_stats(); }
+public static void bug_report(){ m_service.bug_report(); }
 }

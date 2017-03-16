@@ -70,12 +70,17 @@ public void set_bitrate(int br){ m_bitrate = br; }
 @Override
 public void set_bandwidth(int br){ m_bandwidth = br; }
 @Override
-public void init(Object source, Handler handler){
+public void init(Object source, Handler handler, service service){
     this.m_player = (ExoPlayer) source;
     this.m_player.addListener(this);
     this.m_handler = handler;
     update_state(is_prepared()&&m_player.getPlayWhenReady() ?
         "PLAYING" : "IDLE");
+}
+@Override
+public String get_buffered(){
+    return "[["+(m_player.getCurrentPosition()/1000-1)+','
+        +(m_player.getBufferedPosition()/1000)+"]]";
 }
 @Override
 public String get_player_name(){ return "ExoPlayer"; }
