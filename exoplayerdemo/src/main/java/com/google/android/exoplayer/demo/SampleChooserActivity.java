@@ -79,6 +79,12 @@ public class SampleChooserActivity extends Activity {
     });
   }
 
+  @Override
+  protected void onDestroy() {
+    super.onDestroy();
+    api.uninit();
+  }
+
   private void onSampleSelected(Sample sample) {
     Intent mpdIntent = new Intent(this, PlayerActivity.class)
         .setData(Uri.parse(sample.uri))

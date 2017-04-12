@@ -80,7 +80,7 @@ public static HttpDataSource attach(ExoPlayer player, String user_agent,
         DefaultHttpDataSource.DEFAULT_READ_TIMEOUT_MILLIS, false);
 }
 public static void detach(){
-    if (m_service!=null)
+    if (m_service!=null && m_service.is_attached())
         m_service.detach();
 }
 public static boolean is_inited(){ return m_service!=null; }

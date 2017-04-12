@@ -11,3 +11,4 @@ gradlew.bat
 /buildout
 /captures
 .idea
+settings.gradle
