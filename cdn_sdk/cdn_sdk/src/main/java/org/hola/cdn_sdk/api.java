@@ -58,7 +58,9 @@ public static boolean init(Context ctx, String customer, Bundle extra,
 }
 public static void uninit(){
     detach();
-    m_ctx.unbindService(m_conn); }
+    m_ctx.unbindService(m_conn);
+    m_service = null;
+}
 public static MediaPlayer attach(MediaPlayer player){
     if (m_service==null)
         return null;
