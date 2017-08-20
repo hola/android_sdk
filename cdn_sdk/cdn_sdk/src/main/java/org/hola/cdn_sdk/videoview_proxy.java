@@ -667,7 +667,9 @@ public float getPivotX(){ return m_vview.getPivotX(); }
 @ViewDebug.ExportedProperty(category = "drawing")
 public float getPivotY(){ return m_vview.getPivotY(); }
 @Override
-public Resources getResources(){ return m_vview.getResources(); }
+public Resources getResources(){
+    return m_vview != null ? m_vview.getResources() : super.getResources();
+}
 @Override
 public View getRootView(){ return m_vview.getRootView(); }
 @Override
