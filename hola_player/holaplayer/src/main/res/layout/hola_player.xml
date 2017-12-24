@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.holaspark.holaplayer.internal.VideoFrameLayout android:id="@id/hola_player_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" android:layout_gravity="center">
+    </com.holaspark.holaplayer.internal.VideoFrameLayout>
+    <FrameLayout android:id="@id/hola_ad_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+    <com.holaspark.holaplayer.internal.PlayerControlView
+        android:id="@id/hola_player_controlbar"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:controller_layout_id="@layout/hola_player_controlbar"/>
+</merge>

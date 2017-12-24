@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="#22000000">
+    <View android:layout_width="match_parent" android:layout_height="100dp"
+        android:background="@drawable/controlbar_gradient" android:rotation="180"
+        android:layout_gravity="top"/>
+    <View android:layout_width="match_parent" android:layout_height="100dp"
+        android:background="@drawable/controlbar_gradient" android:layout_gravity="bottom"/>
+    <LinearLayout style="@style/HolaTopBar">
+        <ImageButton android:id="@id/hola_player_menu_button" style="@style/HolaMenuButton"/>
+    </LinearLayout>
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="center" android:orientation="horizontal">
+        <ImageButton android:id="@id/exo_play" style="@style/HolaPlayButton.Play"/>
+        <ImageButton android:id="@id/exo_pause" style="@style/HolaPlayButton.Pause"/>
+    </LinearLayout>
+    <LinearLayout style="@style/HolaBottomBar">
+        <TextView android:id="@id/exo_position"  style="@style/HolaPlayerTime.Current"/>
+        <com.google.android.exoplayer2.ui.DefaultTimeBar android:id="@id/exo_progress"
+            style="@style/HolaTimeBar"/>
+        <TextView android:id="@id/exo_duration" style="@style/HolaPlayerTime.Duration"/>
+        <ImageButton android:id="@id/hola_fullscreen_button" style="@style/HolaFullscreenButton"/>
+    </LinearLayout>
+</FrameLayout>

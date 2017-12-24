@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="hola_player_content" type="id" />
+    <item name="hola_player_controlbar" type="id" />
+    <item name="hola_player_menu_button" type="id" />
+    <item name="hola_ad_overlay" type="id" />
+    <item name="hola_speed_menu" type="id" />
+    <item name="hola_player_floating" type="id" />
+    <item name="hola_player_floating_content" type="id" />
+    <item name="hola_quality_menu" type="id" />
+    <item name="hola_fullscreen_button" type="id" />
+</resources>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <style name="HolaPlayButton" parent="ExoMediaButton">
+        <item name="android:layout_width">64dp</item>
+        <item name="android:layout_height">64dp</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+    <style name="HolaPlayButton.Play">
+        <item name="android:src">@drawable/exo_controls_play</item>
+        <item name="android:contentDescription">@string/exo_controls_play_description</item>
+    </style>
+    <style name="HolaPlayButton.Pause">
+        <item name="android:src">@drawable/exo_controls_pause</item>
+        <item name="android:contentDescription">@string/exo_controls_pause_description</item>
+    </style>
+    <style name="HolaTimeBar">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">26dp</item>
+        <item name="played_color">#FF00B7F1</item>
+        <item name="unplayed_color">#8073859F</item>
+        <item name="buffered_color">#BF73859F</item>
+    </style>
+    <style name="HolaPlayerTime">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textStyle">normal</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:textColor">#FFFFFFFF</item>
+    </style>
+    <style name="HolaPlayerTime.Current">
+        <item name="android:paddingRight">4dp</item>
+    </style>
+    <style name="HolaPlayerTime.Duration">
+        <item name="android:paddingLeft">4dp</item>
+    </style>
+    <style name="HolaMenuButton">
+        <item name="android:layout_width">32dp</item>
+        <item name="android:layout_height">32dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:src">@drawable/ic_menu</item>
+        <item name="android:contentDescription">@string/hola_menu_description</item>
+    </style>
+    <style name="HolaFullscreenButton">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:layout_marginLeft">6dp</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:src">@drawable/ic_fullscreen</item>
+        <item name="android:scaleType">fitCenter</item>
+    </style>
+    <style name="HolaTopBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">top</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">right</item>
+        <item name="android:paddingTop">6dp</item>
+        <item name="android:paddingLeft">4dp</item>
+        <item name="android:paddingRight">4dp</item>
+    </style>
+    <style name="HolaBottomBar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">bottom</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+</resources>

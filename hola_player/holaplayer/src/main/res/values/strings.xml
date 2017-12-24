@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Hola Player</string>
+    <string name="hola_menu_description">Menu</string>
+    <string name="quality">Quality</string>
+    <string name="playback_speed">Playback speed</string>
+    <string name="normal">Normal</string>
+    <string name="auto">Auto</string>
+</resources>

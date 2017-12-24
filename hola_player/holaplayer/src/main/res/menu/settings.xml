@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/quality_menu_item" android:title="@string/quality"
+        android:icon="@drawable/ic_gear">
+        <menu></menu>
+    </item>
+    <item android:id="@+id/speed_menu_item" android:title="@string/playback_speed"
+        android:icon="@drawable/ic_speed">
+        <menu></menu>
+    </item>
+</menu>
