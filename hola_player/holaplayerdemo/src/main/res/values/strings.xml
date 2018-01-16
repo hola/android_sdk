@@ -6,6 +6,8 @@
     </string>
     <string name="video_url_hls"><![CDATA[http://player.h-cdn.org/static/hls/cdn2/master.m3u8]]>
     </string>
+    <string name="video_url_hls_vr"><![CDATA[https://github.com/FinweLtd/orion360-sdk-test-content/blob/master/set1/equi/Orion360_test_video_1920x960.mp4?raw=true]]>
+    </string>
     <string name="lorem_ipsum"><![CDATA[Lorem ipsum dolor sit amet, aliquam enim nam elit mollis, montes sem eget urna lobortis nulla vitae, amet in, amet vel nullam, neque dapibus sed elit eiusmod phasellus tempus. Praesent dapibus sunt sed enim. Bibendum a a erat ante, tempus libero donec ut tempus praesent tellus. Vestibulum nibh donec in donec integer vehicula, curabitur ut, mi congue condimentum imperdiet ut, lectus eget ipsum arcu arcu proin non, id ac erat. Elit pretium sapien, in nonummy, vehicula curabitur urna viverra in suscipit et, quis eros. Justo tortor vitae magna vitae id. In vulputate ornare, sed quis in dapibus orci nulla, lobortis pulvinar adipiscing. Proin magna sit litora justo, dapibus mauris magna, est tortor luctus sed, sed dolor quis aliquam a. Aenean lorem porta auctor est non. Molestie est lectus purus at varius leo, sapien ac felis lorem diam ullamcorper ut, vel porttitor posuere aliquam.]]>
     </string>
 </resources>

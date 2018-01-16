@@ -1,0 +1,11 @@
+<resources>
+    <declare-styleable name="HolaPlayer">
+        <attr name="float_mode" format="boolean"/>
+        <attr name="vr_mode" format="boolean"/>
+        <attr name="float_close_on_touch" format="boolean"/>
+        <attr name="thumbnails" format="boolean"/>
+        <attr name="full_frame_thumbnails" format="boolean"/>
+        <attr name="watch_next" format="boolean"/>
+        <attr name="customer" format="string"/>
+    </declare-styleable>
+</resources>

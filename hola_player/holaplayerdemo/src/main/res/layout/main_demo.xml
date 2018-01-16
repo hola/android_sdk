@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+android:keepScreenOn="true">
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:scrollbars="vertical"
+        android:scrollbarAlwaysDrawVerticalTrack="true">
+        <EditText
+            android:id="@+id/editText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="sparkdemo"
+            android:hint="Enter customer id here" />
+        <Button
+            android:id="@+id/search_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Search" />
+        <com.holaspark.holaplayer.HolaPlayer
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/float_player"
+            app:float_mode="true" app:float_close_on_touch="false"
+            app:thumbnails="true" app:full_frame_thumbnails="true" app:watch_next="true"
+            app:vr_mode="false"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="@string/lorem_ipsum"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="@string/lorem_ipsum"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:text="@string/lorem_ipsum"/>
+    </LinearLayout>
+</ScrollView>
+</FrameLayout>
+

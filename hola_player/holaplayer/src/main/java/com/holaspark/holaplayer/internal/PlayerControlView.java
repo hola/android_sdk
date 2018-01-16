@@ -8,7 +8,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
 import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
+import com.holaspark.holaplayer.BuildConfig;
 import com.holaspark.holaplayer.HolaPlayer;
 import com.holaspark.holaplayer.R;
 import java.lang.reflect.Field;
@@ -24,7 +26,7 @@ public class PlayerControlView extends PlaybackControlView {
 private ExoPlayerController m_controller;
 private HolaPlayer m_hola_player;
 private Map<MenuItem, QualityItem> m_quality_map;
-
+private Player.DefaultEventListener m_player_listener;
 public PlayerControlView(Context context){
     this(context, null);
 }
@@ -50,6 +52,22 @@ public PlayerControlView(Context context, AttributeSet attrs, int defStyleAttr,
         @Override
         public void onClick(View v){ m_hola_player.fullscreen(null); }
     });
+    m_player_listener = new Player.DefaultEventListener() {
+        @Override
+        public void onPlayerStateChanged(boolean playing, int state){ set_auto_hide(playing); }
+    };
+}
+
+@Override
+public void setPlayer(Player player) {
+    Player old = getPlayer();
+    super.setPlayer(player);
+    if (old==player)
+        return;
+    if (old!=null)
+        old.removeListener(m_player_listener);
+    if (player!=null)
+        player.addListener(m_player_listener);
 }
 
 private void show_settings_menu(View v){
@@ -59,14 +77,18 @@ private void show_settings_menu(View v){
     inflater.inflate(R.menu.settings, menu);
     populate_speed_menu(menu.findItem(R.id.speed_menu_item));
     populate_quality_menu(menu.findItem(R.id.quality_menu_item));
+    menu.findItem(R.id.powered_by_hola).setTitle(getResources().getString(R.string.powered_by_hola)+
+        " "+BuildConfig.VERSION_NAME);
     force_popup_menu_icons(popup);
     popup.setOnDismissListener(new PopupMenu.OnDismissListener(){
         @Override
-        public void onDismiss(PopupMenu menu){ enable_auto_hide(); }
+        public void onDismiss(PopupMenu menu){ set_auto_hide(true); }
     });
     popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener(){
         @Override
         public boolean onMenuItemClick(MenuItem item){
+            if (item.getItemId()==R.id.powered_by_hola)
+                return false;
             if (item.getGroupId()==R.id.hola_speed_menu)
                 set_speed(item);
             else if (item.getGroupId()==R.id.hola_quality_menu)
@@ -75,7 +97,7 @@ private void show_settings_menu(View v){
         }
     });
     popup.show();
-    disable_auto_hide();
+    set_auto_hide(false);
 }
 
 private void set_speed(MenuItem item){
@@ -137,20 +159,12 @@ public static void force_popup_menu_icons(PopupMenu popupMenu){
     } catch (Throwable e){ e.printStackTrace(); }
 }
 
-public void disable_auto_hide(){
-    setShowTimeoutMs(-1);
-    show();
+public void set_auto_hide(boolean val){
+    setShowTimeoutMs(val ? DEFAULT_SHOW_TIMEOUT_MS : -1);
+    if (isVisible())
+        show();
 }
 
-public void enable_auto_hide(){
-    setShowTimeoutMs(DEFAULT_SHOW_TIMEOUT_MS);
-    show();
-}
-
-public void set_player_controller(ExoPlayerController controller){
-    m_controller = controller;
-}
-public void set_hola_player(HolaPlayer player){
-    m_hola_player = player;
-}
+public void set_player_controller(ExoPlayerController controller){ m_controller = controller; }
+public void set_hola_player(HolaPlayer player){ m_hola_player = player; }
 }

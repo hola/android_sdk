@@ -1,5 +1,4 @@
 package com.holaspark.holaplayer;
-import android.net.Uri;
 public class PlayItem {
 private final String m_ad_tag;
 private final String m_media;

@@ -9,4 +9,8 @@
     <item name="hola_player_floating_content" type="id" />
     <item name="hola_quality_menu" type="id" />
     <item name="hola_fullscreen_button" type="id" />
+    <item name="powered_by_hola" type="id" />
+    <item name="thumb_frame_layout" type="id" />
+    <item name="thumb_holder" type="id" />
+    <item name="hola_player_360view" type="id" />
 </resources>
