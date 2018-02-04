@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:orientation="vertical" android:keepScreenOn="true" android:layout_margin="5dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="15dp" android:orientation="horizontal">
+        <ImageView android:layout_width="260dp" android:layout_height="wrap_content"
+            android:adjustViewBounds="true" android:src="@drawable/spark_logo" />
+        <TextView android:layout_width="wrap_content" android:layout_gravity="bottom"
+            android:layout_height="wrap_content" android:text="@string/demo_app"
+            android:textColor="@color/black" android:layout_marginBottom="2dp"
+            android:layout_marginLeft="10dp" android:textStyle="bold" android:textSize="18sp"/>
+    </LinearLayout>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" android:textSize="18sp" android:textColor="@color/black"
+        android:text="@string/welcome" />
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_marginTop="10dp" android:textSize="18sp" android:textColor="@color/black"
+        android:text="@string/enter_customer_id" android:labelFor="@+id/customer_id"/>
+    <EditText android:id="@id/customer_id" android:layout_marginTop="10dp"
+        android:layout_width="300dp" android:layout_height="wrap_content" android:textSize="20sp"
+        android:padding="5dp" android:layout_gravity="center_horizontal"
+        android:background="@drawable/bg_edit_text" android:text="@string/demo_customer"
+        android:inputType="text"/>
+    <Button android:id="@+id/start" android:layout_marginTop="10dp"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:text="@string/start" android:layout_gravity="center_horizontal"
+        android:textAllCaps="false"/>
+    <TextView android:id="@+id/check_customer_result" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_gravity="center_horizontal"
+        android:layout_marginTop="10dp" android:textSize="18sp" android:textColor="@color/black" />
+    <View android:layout_width="match_parent" android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="center" android:layout_marginBottom="20dp" android:textSize="14sp"
+        android:textColor="@color/black" android:text="@string/requires_account" />
+</LinearLayout>
+

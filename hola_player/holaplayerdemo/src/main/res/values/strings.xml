@@ -1,13 +1,28 @@
 <resources>
     <string name="app_name">Hola Spark Player Demo</string>
+    <string name="demo_app">Demo app</string>
+    <string name="welcome">Welcome to Hola Spark SDK demo app!</string>
+    <string name="enter_customer_id">Please enter your customerID:</string>
+    <string name="start">Start</string>
+    <string name="requires_account">This app requires an active Hola Spark account.</string>
+    <string name="demo_customer">sparkdemo</string>
+    <string name="loading">Processing…</string>
     <string name="ad_tag"><![CDATA[https://pubads.g.doubleclick.net/gampad/ads?sz=640x480&iu=/124319096/external/single_ad_samples&ciu_szs=300x250&impl=s&gdfp_req=1&env=vp&output=vast&unviewed_position_start=1&cust_params=deployment%3Ddevsite%26sample_ct%3Dskippablelinear&correlator=]]>
     </string>
-    <string name="video_url_mp4"><![CDATA[http://player.h-cdn.org/static/mp4/bbb_sunflower_360p_30fps.mp4]]>
+    <string name="video_url_mp4"><![CDATA[http://video.h-cdn.com/static/mp4/bbb_sunflower_360p_30fps.mp4]]>
     </string>
-    <string name="video_url_hls"><![CDATA[http://player.h-cdn.org/static/hls/cdn2/master.m3u8]]>
+    <string name="image_url_mp4"><![CDATA[http://video.h-cdn.com/static/mp4/bbb.jpg]]>
+    </string>
+    <string name="video_url_hls"><![CDATA[http://video.h-cdn.com/static/hls/cdn2/master.m3u8]]>
+    </string>
+    <string name="image_url_hls"><![CDATA[http://video.h-cdn.com/static/hls/cdn2/poster.jpg]]>
+    </string>
+    <string name="video_url_live"><![CDATA[http://holaspark.com/live_video/post_game/playlist_dvr.m3u8]]>
     </string>
     <string name="video_url_hls_vr"><![CDATA[https://github.com/FinweLtd/orion360-sdk-test-content/blob/master/set1/equi/Orion360_test_video_1920x960.mp4?raw=true]]>
     </string>
-    <string name="lorem_ipsum"><![CDATA[Lorem ipsum dolor sit amet, aliquam enim nam elit mollis, montes sem eget urna lobortis nulla vitae, amet in, amet vel nullam, neque dapibus sed elit eiusmod phasellus tempus. Praesent dapibus sunt sed enim. Bibendum a a erat ante, tempus libero donec ut tempus praesent tellus. Vestibulum nibh donec in donec integer vehicula, curabitur ut, mi congue condimentum imperdiet ut, lectus eget ipsum arcu arcu proin non, id ac erat. Elit pretium sapien, in nonummy, vehicula curabitur urna viverra in suscipit et, quis eros. Justo tortor vitae magna vitae id. In vulputate ornare, sed quis in dapibus orci nulla, lobortis pulvinar adipiscing. Proin magna sit litora justo, dapibus mauris magna, est tortor luctus sed, sed dolor quis aliquam a. Aenean lorem porta auctor est non. Molestie est lectus purus at varius leo, sapien ac felis lorem diam ullamcorper ut, vel porttitor posuere aliquam.]]>
+    <string name="lorem_ipsum"><![CDATA[Lorem ipsum dolor sit amet, aliquam enim nam elit mollis, montes sem eget urna lobortis.]]>
+    </string>
+    <string name="lorem_ipsum_long"><![CDATA[Lorem ipsum dolor sit amet, aliquam enim nam elit mollis, montes sem eget urna lobortis nulla vitae, amet in, amet vel nullam, neque dapibus sed elit eiusmod phasellus tempus. Praesent dapibus sunt sed enim. Bibendum a a erat ante, tempus libero donec ut tempus praesent tellus. Vestibulum nibh donec in donec integer vehicula, curabitur ut, mi congue condimentum imperdiet ut, lectus eget ipsum arcu arcu proin non, id ac erat. Elit pretium sapien, in nonummy, vehicula curabitur urna viverra in suscipit et, quis eros. Justo tortor vitae magna vitae id. In vulputate ornare, sed quis in dapibus orci nulla, lobortis pulvinar adipiscing. Proin magna sit litora justo, dapibus mauris magna, est tortor luctus sed, sed dolor quis aliquam a. Aenean lorem porta auctor est non. Molestie est lectus purus at varius leo, sapien ac felis lorem diam ullamcorper ut, vel porttitor posuere aliquam.]]>
     </string>
 </resources>

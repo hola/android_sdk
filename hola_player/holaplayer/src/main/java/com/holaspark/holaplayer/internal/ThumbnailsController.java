@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -27,6 +29,10 @@ import com.holaspark.holaplayer.R;
 import com.holaspark.holaplayer.ThumbnailsConfig;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static android.view.View.GONE;
 import static android.view.View.VISIBLE;
 
@@ -75,8 +81,9 @@ private void load_conf(){
     if (customer == null || m_play_item == null)
         return;
     set_conf(null);
+    // XXX andrey: use hola_cdn api
     final String url = new Uri.Builder().scheme("http")
-        .authority("holaspark-demo.h-cdn.com")
+        .authority("holaspark-demo.h-cdn.com") // XXX andrey: use real customer id
         .path("api/get_thumb_info").appendQueryParameter("customer", customer)
         .appendQueryParameter("url", m_play_item.get_media()).build()
         .toString();
@@ -114,7 +121,14 @@ private void load_conf(){
         public void onErrorResponse(VolleyError error){
             VolleyLog.e(Const.TAG+" Error: "+error.getMessage());
         }
-    });
+    }){
+        @Override
+        public Map<String, String> getHeaders() throws AuthFailureError{
+            Map<String, String> params = new HashMap<>();
+            params.put("Referer", "http://player.h-cdn.com/webview?customer=demo");
+            return params;
+        }
+    };
     m_request_queue.add(req);
 }
 private void set_conf(ThumbnailsConfig conf){

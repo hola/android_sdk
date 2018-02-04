@@ -37,6 +37,14 @@
             <com.google.android.exoplayer2.ui.DefaultTimeBar android:id="@id/exo_progress"
                 style="@style/HolaTimeBar"/>
             <TextView android:id="@id/exo_duration" style="@style/HolaPlayerTime.Duration"/>
+            <LinearLayout android:id="@+id/live_control" android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="1"
+                android:orientation="horizontal" android:visibility="gone"
+                android:gravity="right|center_vertical">
+                <ImageView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:src="@drawable/live_button" />
+                <TextView style="@style/HolaLiveControl"/>
+            </LinearLayout>
             <ImageButton android:id="@id/hola_fullscreen_button" style="@style/HolaFullscreenButton"/>
         </LinearLayout>
     </LinearLayout>

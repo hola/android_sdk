@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.PopupMenu;
 import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.ui.DefaultTimeBar;
 import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.holaspark.holaplayer.BuildConfig;
 import com.holaspark.holaplayer.HolaPlayer;
@@ -27,6 +29,10 @@ private ExoPlayerController m_controller;
 private HolaPlayer m_hola_player;
 private Map<MenuItem, QualityItem> m_quality_map;
 private Player.DefaultEventListener m_player_listener;
+private View m_live_control;
+private View m_position;
+private View m_duration;
+private DefaultTimeBar m_progress;
 public PlayerControlView(Context context){
     this(context, null);
 }
@@ -42,6 +48,10 @@ public PlayerControlView(Context context, AttributeSet attrs, int defStyleAttr){
 public PlayerControlView(Context context, AttributeSet attrs, int defStyleAttr,
     AttributeSet playbackAttrs){
     super(context, attrs, defStyleAttr, playbackAttrs);
+    m_live_control = findViewById(R.id.live_control);
+    m_position = findViewById(R.id.exo_position);
+    m_duration = findViewById(R.id.exo_duration);
+    m_progress = findViewById(R.id.exo_progress);
     m_quality_map = new HashMap<>();
     findViewById(R.id.hola_player_menu_button).setOnClickListener(new OnClickListener(){
         @Override
@@ -55,6 +65,14 @@ public PlayerControlView(Context context, AttributeSet attrs, int defStyleAttr,
     m_player_listener = new Player.DefaultEventListener() {
         @Override
         public void onPlayerStateChanged(boolean playing, int state){ set_auto_hide(playing); }
+        @Override
+        public void onTimelineChanged(Timeline timeline, Object manifest){
+            boolean live = getPlayer().isCurrentWindowDynamic();
+            m_live_control.setVisibility(live ? VISIBLE : GONE);
+            m_position.setVisibility(live ? GONE : VISIBLE);
+            m_duration.setVisibility(live ? GONE : VISIBLE);
+            m_progress.setVisibility(live ? GONE : VISIBLE);
+        }
     };
 }
 

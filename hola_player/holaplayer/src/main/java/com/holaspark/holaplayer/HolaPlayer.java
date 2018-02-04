@@ -17,6 +17,12 @@ import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.util.AttributeSet;
+import com.google.android.exoplayer2.ExoPlaybackException;
+import com.google.android.exoplayer2.PlaybackParameters;
+import com.google.android.exoplayer2.Player;
+import com.google.android.exoplayer2.Timeline;
+import com.google.android.exoplayer2.source.TrackGroupArray;
+import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
 import com.holaspark.holaplayer.internal.PlayerControlView;
 import com.holaspark.holaplayer.internal.Const;
 import com.holaspark.holaplayer.internal.ExoPlayerController;
@@ -26,13 +32,14 @@ import com.holaspark.holaplayer.internal.PlayerViewManager;
 import com.holaspark.holaplayer.internal.ThumbnailsController;
 import com.holaspark.holaplayer.internal.VideoFrameLayout;
 import com.holaspark.holaplayer.internal.WatchNextController;
-
 import net.protyposis.android.spectaculum.InputSurfaceHolder;
 import net.protyposis.android.spectaculum.LibraryHelper;
 import net.protyposis.android.spectaculum.SpectaculumView;
 import net.protyposis.android.spectaculum.effects.ImmersiveEffect;
-import net.protyposis.android.spectaculum.effects.ImmersiveTouchNavigation;
 import net.protyposis.android.spectaculum.gles.GLUtils;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
 public class HolaPlayer extends FrameLayout implements HolaPlayerAPI,
     GestureDetector.OnGestureListener,
     ViewTreeObserver.OnScrollChangedListener
@@ -54,18 +61,21 @@ private ViewGroup.LayoutParams m_saved_overlay_params;
 private HolaPlayerConfig m_config;
 private Rect m_temprect = new Rect();
 private EventListener m_listener;
+private Set<HolaPlayerAPI.EventListener> m_listeners;
 private ThumbnailsController m_thumb_ctrl;
 private WatchNextController m_watch_next_ctrl;
 private ImmersiveEffect m_immersive;
-private ImmersiveTouchNavigation m_immersivetouch;
 private float m_panx;
 private float m_pany;
+private boolean m_controlbar_enabled;
 public HolaPlayer(Context context, AttributeSet attrs){
     super(context, attrs);
     Log.d(Const.TAG, "init");
     m_context = context;
     m_state = new PlayerState();
     m_config = new HolaPlayerConfig();
+    m_listeners = new CopyOnWriteArraySet<>();
+    setBackgroundColor(getResources().getColor(R.color.black));
     if (attrs != null)
     {
         TypedArray style = m_context.getTheme().obtainStyledAttributes(attrs,
@@ -106,11 +116,13 @@ private void setup_player(){
     m_overlay = findViewById(R.id.hola_ad_overlay);
     m_controller = new ExoPlayerController(this);
     m_state.m_inited = m_controller.init(m_context, m_overlay);
+    m_controlbar_enabled = true;
     m_controlbar = findViewById(R.id.hola_player_controlbar);
     m_controlbar.set_hola_player(this);
     m_controlbar.show();
     m_controller.set_controlbar(m_controlbar);
     m_controller.add_event_listener(m_listener);
+    m_controller.get_exoplayer().addListener(m_listener);
     m_fullscreen = new FullScreenPlayer(m_context);
     set_scroll_observer(m_config.m_floatmode);
     m_gesturedetector = new GestureDetector(m_context, this);
@@ -125,6 +137,44 @@ private void setup_player(){
     if (m_config.m_watch_next)
         init_watch_next();
     check_create_video_view();
+}
+@Override
+protected void onMeasure(int width_spec, int height_spec){
+    super.onMeasure(width_spec, height_spec);
+    int width_mode = MeasureSpec.getMode(width_spec);
+    int width_size = MeasureSpec.getSize(width_spec);
+    int height_mode = MeasureSpec.getMode(height_spec);
+    int height_size = MeasureSpec.getSize(height_spec);
+    float aspect = m_controller.get_aspect()==0 ? 16f/9f : m_controller.get_aspect();
+    int video_width = m_controller.get_video_width()==0 ? 960 : m_controller.get_video_width();
+    int video_height = m_controller.get_video_height()==0 ? 540 : m_controller.get_video_height();
+    int max_width = width_mode==MeasureSpec.AT_MOST ? width_size: Integer.MAX_VALUE;
+    int max_height = height_mode==MeasureSpec.AT_MOST ? height_size: Integer.MAX_VALUE;
+    int width, height;
+    if (width_mode==MeasureSpec.EXACTLY && height_mode==MeasureSpec.EXACTLY)
+    {
+        width = width_size;
+        height = height_size;
+    }
+    else if (width_mode==MeasureSpec.EXACTLY)
+    {
+        width = width_size;
+        height = Math.min(Math.round(width_size/aspect), max_height);
+    }
+    else if (height_mode==MeasureSpec.EXACTLY)
+    {
+        height = height_size;
+        width = Math.min(Math.round(height_size*aspect), max_width);
+    }
+    else
+    {
+        float scale = video_width>max_width || video_height>max_height ?
+            Math.min((float) max_width/video_width, (float)max_height/video_height) : 1;
+        width = Math.round(scale*video_width);
+        height = Math.round(scale*video_height);
+    }
+    super.onMeasure(MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY),
+        MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY));
 }
 @Override
 public void vr_mode(Boolean state){
@@ -193,12 +243,25 @@ public void pause(){
     m_controller.pause();
 }
 @Override
+public boolean is_playing(){ return m_controller.is_playing(); }
+@Override
+public boolean is_playing_ad(){ return m_controller.is_playing_ad(); }
+@Override
+public boolean is_paused(){ return m_controller.is_paused(); }
+@Override
+public int get_playback_state(){ return m_controller.get_playback_state(); }
+@Override
 public void seek(long position){
     if (!m_state.m_inited)
         return;
     Log.d(Const.TAG, "seek "+position);
     m_controller.seek(position);
 }
+@Override
+public long get_position(){
+    return m_controller.get_exoplayer().getCurrentPosition(); }
+@Override
+public long get_duration(){ return m_controller.get_exoplayer().getDuration(); }
 @Override
 public void load(String url){
     Log.d(Const.TAG, "load "+url+" "+m_state.m_inited);
@@ -235,14 +298,9 @@ private void show_fullscreen(){
     if (m_state.m_fullscreen)
         m_fullscreen.activate(this);
     else
-    {
         m_fullscreen.restore_player();
-        View parent = (View)m_content.getParent();
-        ViewGroup.LayoutParams params = parent.getLayoutParams();
-        params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        params.width = ViewGroup.LayoutParams.MATCH_PARENT;
-        parent.setLayoutParams(params);
-    }
+    for (HolaPlayerAPI.EventListener listener : m_listeners)
+        listener.on_fullscreen_changed(m_state.m_fullscreen);
 }
 public FullScreenPlayer get_fullscreen(){ return m_fullscreen; }
 private void set_scroll_observer(boolean on){
@@ -274,6 +332,43 @@ public void set_watch_next_items(PlayListItem[] items){
         return;
     m_watch_next_ctrl.init(items);
 }
+@Override
+public void add_listener(HolaPlayerAPI.EventListener listener){
+    m_listeners.add(listener);
+}
+@Override
+public void remove_listener(HolaPlayerAPI.EventListener listener){
+    m_listeners.remove(listener);
+}
+@Override
+public int get_video_width(){
+    return m_controller.get_video_width();
+}
+@Override
+public int get_video_height(){
+    return m_controller.get_video_height();
+}
+@Override
+public void set_controls_state(boolean enabled){
+    m_controlbar_enabled = enabled;
+    if (!enabled)
+        m_controlbar.hide();
+}
+@Override
+public boolean get_controls_state(){ return m_controlbar_enabled; }
+@Override
+public void set_controls_visibility(boolean visible){
+    if (visible)
+        m_controlbar.show();
+    else
+        m_controlbar.hide();
+}
+@Override
+public boolean get_controls_visibility(){
+    return m_controlbar.isVisible();
+}
+@Override
+public boolean get_vr_mode(){ return m_state.m_vr_active; }
 public HolaPlayerConfig get_config() { return m_config; }
 private void float_state(boolean state){
     if (m_state.m_floating==state)
@@ -311,6 +406,7 @@ private void float_state(boolean state){
         m_viewmanager.detach(m_content);
         floating_player.addView(m_content);
         floating_player.requestLayout();
+        m_controller.send_spark_event("{id: 'persistent', event: 'start'}");
         return;
     }
     m_viewmanager.restore(m_content);
@@ -388,7 +484,7 @@ public boolean onSingleTapUp(MotionEvent e){
     }
     if (m_controlbar.isVisible())
         m_controlbar.hide();
-    else
+    else if (m_controlbar_enabled)
     {
         m_controlbar.setShowTimeoutMs(
             PlayerControlView.DEFAULT_SHOW_TIMEOUT_MS);
@@ -408,17 +504,72 @@ public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 public void onScrollChanged(){
     m_temprect.set(0, 0, m_overlay.getWidth(), m_overlay.getHeight());
     getChildVisibleRect(m_overlay, m_temprect, null);
-    if (m_temprect.height()<m_overlay.getHeight() && !m_state.m_floating)
+    if (m_temprect.height()<m_overlay.getHeight()/2 && !m_state.m_floating)
         float_state(true);
-    else if (m_temprect.height()==m_overlay.getHeight() && m_temprect.top>=0
+    else if (m_temprect.height()>m_overlay.getHeight()/2 && m_temprect.top>=0
         && m_temprect.bottom>=0 && m_state.m_floating)
     {
         float_state(false);
     }
 }
-private class EventListener implements ExoPlayerController.VideoEventListener,
-    InputSurfaceHolder.Callback
+private class EventListener extends Player.DefaultEventListener implements
+    ExoPlayerController.VideoEventListener, InputSurfaceHolder.Callback
 {
+    private boolean m_play_when_ready = false;
+    private int m_playback_state = Player.STATE_IDLE;
+    @Override
+    public void onPlayerStateChanged(boolean play_when_ready, int playback_state){
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+        {
+            if (m_play_when_ready!=play_when_ready)
+            {
+                if (play_when_ready)
+                    listener.on_play();
+                else
+                    listener.on_pause();
+            }
+            if (m_playback_state!=playback_state)
+                listener.on_state_changed(playback_state);
+        }
+        m_play_when_ready = play_when_ready;
+        m_playback_state = playback_state;
+    }
+    @Override
+    public void onSeekProcessed(){
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_seeked();
+    }
+    @Override
+    public void onPlayerError(ExoPlaybackException error){
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_error(error);
+    }
+    @Override
+    public void onTimelineChanged(Timeline timeline, Object manifest){
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_timeline_changed(timeline, manifest);
+    }
+    @Override
+    public void onTracksChanged(TrackGroupArray track_groups, TrackSelectionArray track_selections){
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_tracks_changed(track_groups, track_selections);
+    }
+    @Override
+    public void onLoadingChanged(boolean is_loading){
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_loading_changed(is_loading);
+    }
+    @Override
+    public void onPositionDiscontinuity(@Player.DiscontinuityReason int reason){
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_position_discontinuity(reason);
+    }
+
+    @Override
+    public void onPlaybackParametersChanged(PlaybackParameters playback_parameters){
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_playback_parameters_changed(playback_parameters);
+    }
     @Override
     public void on_video_size(int width, int height){
         float aspect = ((float)width)/height;
@@ -436,11 +587,15 @@ private class EventListener implements ExoPlayerController.VideoEventListener,
         Log.d(Const.TAG, "ad started st:"+m_controller.is_playing_ad());
         m_controlbar.hide();
         check_create_video_view();
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_ad_start();
     }
     @Override
     public void on_ad_end(){
         Log.d(Const.TAG, "ad ended st:"+m_controller.is_playing_ad());
         check_create_video_view();
+        for (HolaPlayerAPI.EventListener listener : m_listeners)
+            listener.on_ad_end();
     }
     @Override
     public void surfaceCreated(InputSurfaceHolder holder){

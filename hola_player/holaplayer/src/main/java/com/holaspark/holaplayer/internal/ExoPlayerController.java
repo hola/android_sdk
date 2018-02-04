@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -63,6 +64,7 @@ import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.VideoRendererEventListener;
+import com.holaspark.holaplayer.BuildConfig;
 import com.holaspark.holaplayer.HolaPlayer;
 import com.holaspark.holaplayer.HolaPlayerCallback;
 import com.holaspark.holaplayer.PlayItem;
@@ -77,6 +79,7 @@ import java.util.Vector;
 public class ExoPlayerController {
 private static final TrackSelection.Factory FIXED_FACTORY = new FixedTrackSelection.Factory();
 private static final DefaultBandwidthMeter BANDWIDTH_METER = new DefaultBandwidthMeter();
+private static final String PLAYER_NAME = "HolaPlayer";
 private Context m_context;
 private ExoPlayer m_exoplayer;
 private Listener m_listener;
@@ -105,9 +108,8 @@ private String m_state = "NONE";
 private String m_media_url = "";
 private HolaPlayerCallback m_playlist_cb;
 // XXX pavelki/andrey: TODO
-public ExoPlayerController(HolaPlayer m_hola_player){
-    m_hola_player = m_hola_player;
-    m_customer = m_hola_player.get_config().m_customer;
+public ExoPlayerController(HolaPlayer hola_player){
+    m_customer = hola_player.get_config().m_customer;
 }
 public boolean init(Context context, View overlay)
 {
@@ -128,9 +130,9 @@ public boolean init(Context context, View overlay)
         .newInstance(m_renderers, m_trackselector, m_loadcontrol);
     m_datasource = new DefaultDataSourceFactory(m_context, BANDWIDTH_METER,
         new DefaultHttpDataSourceFactory(
-            Util.getUserAgent(m_context, "HolaPlayer"), BANDWIDTH_METER));
+            Util.getUserAgent(m_context, PLAYER_NAME), BANDWIDTH_METER));
     set_customer(m_customer);
-    update_state("IDLE");
+    m_state = "IDLE";
     return true;
 }
 public void set_customer(String customer){
@@ -138,19 +140,23 @@ public void set_customer(String customer){
         return;
     m_customer = customer.equals("sparkdemo") ? "demo_spark" : customer;
     m_exoplayer.addListener(m_listener);
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+        WebView.setWebContentsDebuggingEnabled(true);
     m_webview = new WebView(m_context);
     WebSettings settings = m_webview.getSettings();
     settings.setJavaScriptEnabled(true);
     settings.setSupportZoom(false);
+    settings.setUserAgentString(settings.getUserAgentString()+" "+PLAYER_NAME+
+        "/"+BuildConfig.VERSION_NAME);
     m_webview.setVerticalScrollBarEnabled(false);
     m_webview.setVisibility(View.GONE);
     m_webview.setWebChromeClient(new ConsoleClient());
     m_webview.loadUrl("http://player.h-cdn.com/webview?customer="+m_customer
         +"&full=1");
+    // XXX andrey/pavelki: can we use settings.setDomStorageEnabled(true)?
     m_webview.addJavascriptInterface(m_storage, "localStorage");
     m_hola_started = false;
     send_msg("attach", null);
-    return;
 }
 public void play(){ m_exoplayer.setPlayWhenReady(true); }
 public void pause(){ m_exoplayer.setPlayWhenReady(false); }
@@ -229,6 +235,8 @@ private void set_surface(Surface surface){
     m_surface = surface;
 }
 public float get_aspect(){ return m_listener.m_video_aspect; }
+public int get_video_width(){ return m_listener.m_video_width; }
+public int get_video_height(){ return m_listener.m_video_height; }
 public ExoPlayer get_exoplayer(){ return m_exoplayer; }
 public List<QualityItem> get_quality_items(){
     List<QualityItem> res = new ArrayList<>();
@@ -283,8 +291,13 @@ public void uninit(){
     set_surface(null);
     m_exoplayer.release();
 }
+public boolean is_playing(){
+    return m_exoplayer.getPlayWhenReady() &&
+        m_exoplayer.getPlaybackState()==Player.STATE_READY;
+}
 public boolean is_paused(){ return !m_exoplayer.getPlayWhenReady(); }
 public boolean is_playing_ad(){ return m_exoplayer.isPlayingAd(); }
+public int get_playback_state(){ return m_exoplayer.getPlaybackState(); }
 public void load_playlists(final HolaPlayerCallback cb){
     if (!m_hola_started || m_playlist_cb!=null)
     {
@@ -336,6 +349,8 @@ private final class Listener implements VideoRendererEventListener,
     VideoAdPlayer.VideoAdPlayerCallback, Player.EventListener
 {
     private float m_video_aspect = 0;
+    private int m_video_width = 0;
+    private int m_video_height = 0;
     @Override
     public void onVideoEnabled(DecoderCounters counters){
         Log.d(Const.TAG, "on video enabled");
@@ -355,13 +370,14 @@ private final class Listener implements VideoRendererEventListener,
         float pixel_aspect)
     {
         Log.d(Const.TAG, "on video size changed w "+width+" h "+height);
+        m_video_width = width;
+        m_video_height = height;
         float new_aspect = height == 0 ? 1 : (width*pixel_aspect)/height;
         if (new_aspect != m_video_aspect)
         {
             m_video_aspect = new_aspect;
             if (ExoPlayerController.this.m_clientlistener != null)
-                ExoPlayerController.this.m_clientlistener
-                    .on_video_size(width, height);
+                ExoPlayerController.this.m_clientlistener.on_video_size(width, height);
         }
     }
     @Override
@@ -571,6 +587,11 @@ private void send_string(String msg){
     m_webview.evaluateJavascript("javascript:hola_cdn"+
         ".android_message('"+msg+"')", null);
 }
+public void send_spark_event(String obj){
+    // XXX andrey/pavelki: use android_message to send spark events?
+    m_webview.evaluateJavascript("javascript:hola_cdn.api.get_spark()"+
+        ".spark_event("+obj+")", null);
+}
 private void check_hola(){
     if (m_webview==null)
         return;
@@ -578,8 +599,8 @@ private void check_hola(){
         @Override
         public void run(){
             m_webview.addJavascriptInterface(m_proxy, "hola_java_proxy");
-            m_webview.evaluateJavascript("javascript:hola_cdn && typeof " +
-                "hola_cdn.android_message", new ValueCallback<String>()
+            m_webview.evaluateJavascript("javascript:window.hola_cdn && "+
+                "typeof hola_cdn.android_message", new ValueCallback<String>()
             {
                 @Override
                 public void onReceiveValue(String s){
@@ -605,11 +626,8 @@ private class ConsoleClient extends WebChromeClient {
     public boolean onConsoleMessage(ConsoleMessage msg){
         String source = msg.sourceId();
         source = Uri.parse(source).getLastPathSegment();
-        if (!msg.message().contains("hola_cdn is not defined"))
-        {
-            Log.i(Const.TAG+"/JS", msg.messageLevel().name()+":"+source+
-                ":"+msg.lineNumber()+" "+msg.message());
-        }
+        Log.i(Const.TAG+"/JS", msg.messageLevel().name()+":"+source+
+            ":"+msg.lineNumber()+" "+msg.message());
         return true;
     }
 }
@@ -660,7 +678,7 @@ final private class JSProxy {
         return (String) pm.getApplicationLabel(m_context.getApplicationInfo());
     }
     @JavascriptInterface
-    public String get_player_name(){ return "HolaPlayer"; }
+    public String get_player_name(){ return PLAYER_NAME; }
     @JavascriptInterface
     public void wrapper_attached(){ check_hola(); }
     @JavascriptInterface

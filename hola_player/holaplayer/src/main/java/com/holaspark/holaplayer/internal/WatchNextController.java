@@ -33,7 +33,11 @@ public WatchNextController(HolaPlayer hola_player, PlayListItem[] items){
 }
 
 public void show(boolean visible){
+    boolean is_vr = m_hola_player.get_vr_mode();
+    if (is_vr)
+        visible = false;
     m_view.setVisibility(visible ? View.VISIBLE : View.GONE);
+    m_holder.setVisibility(is_vr ? View.GONE : View.VISIBLE);
     View v = m_bottom_bar;
     // XXX andrey: restore original bottom padding
     v.setPadding(v.getPaddingLeft(), v.getPaddingTop(),v.getPaddingRight(),
@@ -45,7 +49,8 @@ public void init(PlayListItem[] items){
         return;
     for (PlayListItem item: items)
     {
-        PlaylistItemView item_view = new PlaylistItemView(m_view.getContext(), m_hola_player, item);
+        PlaylistItemView item_view = new PlaylistItemView(m_view.getContext(),
+            m_hola_player, item);
         m_holder.addView(item_view);
     }
 }

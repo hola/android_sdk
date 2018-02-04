@@ -17,12 +17,12 @@ import com.holaspark.holaplayer.PlayListItem;
 import com.holaspark.holaplayer.R;
 
 public class PlaylistItemView extends FrameLayout implements View.OnClickListener {
-    private HolaPlayer m_hola_player;
-    private TextView m_text;
-    private NetworkImageView m_image;
-    private PlayListItem m_playlist_item;
-    private RequestQueue m_request_queue;
-    private ImageLoader m_image_loader;
+private HolaPlayer m_hola_player;
+private TextView m_text;
+private NetworkImageView m_image;
+private PlayListItem m_playlist_item;
+private RequestQueue m_request_queue;
+private ImageLoader m_image_loader;
 
 public PlaylistItemView(Context context, HolaPlayer hola_player, PlayListItem item) {
     super(context);

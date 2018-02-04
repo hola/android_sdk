@@ -1,45 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-android:keepScreenOn="true">
-<ScrollView
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:keepScreenOn="true">
     <LinearLayout
         android:layout_width="match_parent" android:layout_height="wrap_content"
         android:orientation="vertical" android:scrollbars="vertical"
         android:scrollbarAlwaysDrawVerticalTrack="true">
-        <EditText
-            android:id="@+id/editText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textPersonName"
-            android:text="sparkdemo"
-            android:hint="Enter customer id here" />
-        <Button
-            android:id="@+id/search_btn"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Search" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="15dp" android:layout_marginBottom="10dp"
+            android:orientation="horizontal">
+            <ImageView android:layout_width="260dp" android:layout_height="wrap_content"
+                android:adjustViewBounds="true" android:src="@drawable/spark_logo" />
+            <TextView android:layout_width="wrap_content" android:layout_gravity="bottom"
+                android:layout_height="wrap_content" android:text="@string/demo_app"
+                android:textColor="@color/black" android:layout_marginBottom="2dp"
+                android:layout_marginLeft="10dp" android:textStyle="bold" android:textSize="18sp"/>
+        </LinearLayout>
         <com.holaspark.holaplayer.HolaPlayer
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/float_player"
             app:float_mode="true" app:float_close_on_touch="false"
             app:thumbnails="true" app:full_frame_thumbnails="true" app:watch_next="true"
             app:vr_mode="false"/>
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:text="@string/lorem_ipsum"/>
+            android:layout_height="wrap_content" android:text="@string/lorem_ipsum_long"/>
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:text="@string/lorem_ipsum"/>
+            android:layout_height="wrap_content" android:text="@string/lorem_ipsum_long"/>
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:text="@string/lorem_ipsum"/>
+            android:layout_height="wrap_content" android:text="@string/lorem_ipsum_long"/>
     </LinearLayout>
 </ScrollView>
-</FrameLayout>
-
